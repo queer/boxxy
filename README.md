@@ -3,7 +3,13 @@
 boxxy is a tool for boxing up misbehaving applications and forcing them to put
 their files and directories in the right place.
 
-## Example usage
+## motivation
+
+I recently had to use the AWS CLI. It wants to save data in `~/.aws`, but I
+don't want it to just clutter up my `$HOME` however it wants. boxxy lets me
+force it to puts its data somewhere nice and proper.
+
+## example usage
 
 ```sh
 git:(mistress) 1 | ▶  cat ~/.config/boxxy/boxxy.yaml
@@ -27,4 +33,33 @@ git:(mistress) 2 | ▶  cat ~/.config/aws/config
 region = a
 output = a
 git:(mistress) 2 | ▶
+```
+
+## configuration
+
+The boxxy configuration file lives in `~/.config/boxxy/boxxy.yaml`. If none
+exists, an empty one will be created for you.
+
+```yaml
+rules:
+# The name of the rule. User-friendly name for your reference
+- name: "redirect aws-cli from ~/.aws to ~/.config/aws"
+  # The target of the rule, ie the file/directory that will be shadowed by the
+  # rewrite.
+  target: "~/.aws"
+  # The rewrite of the rule, ie the file/directory that will be used instead of
+  # the target.
+  rewrite: "~/.config/aws"
+- name: "use different k8s configs when in ~/Projects/my-cool-startup"
+  target: "~/.kube/config"
+  rewrite: "~/Projects/my-cool-startup/.kube/config"
+  # The context for the rule. Any paths listed in the context are paths where
+  # this rule will apply. If no context is specified, the rule applies
+  # globally.
+  context:
+  - "~/Projects/my-cool-startup"
+  # The mode of this rule, either `directory` or `file`. `directory` is the
+  # default. Must be specified for the correct behaviour when the target is a
+  # file. Required because the target file/directory may not exist yet.
+  mode: "file"
 ```

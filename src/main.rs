@@ -50,7 +50,7 @@ fn main() -> Result<()> {
     fs::create_dir_all(config_path.parent().unwrap())?;
     if !config_path.exists() {
         info!("no config file found!");
-        fs::write(&config_path, "")?;
+        fs::write(&config_path, "rules:\n")?;
         info!("created empty config at {}", config_path.display());
     }
 
