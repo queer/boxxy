@@ -11,6 +11,30 @@ pub mod enclosure;
 
 fn main() -> Result<()> {
     // Fetch command to run
+    let (self_exe, cmd, maybe_args) = collect_args();
+    setup_logging(&self_exe)?;
+
+    // Load rules
+    let rules = load_rules(&self_exe)?;
+    info!("loaded {} rules", rules.rules.len());
+
+    // Do the do!
+    let mut command = Command::new(cmd);
+
+    // Pass through current env
+    command.envs(std::env::vars());
+
+    // Pass args
+    if let Some(args) = maybe_args {
+        command.args(args);
+    }
+
+    enclosure::Enclosure::new(rules, &mut command).run()?;
+
+    Ok(())
+}
+
+fn collect_args() -> (String, String, Option<Vec<String>>) {
     let args = std::env::args().collect::<Vec<String>>();
     let (self_exe, cmd, maybe_args) = {
         #[allow(clippy::comparison_chain)]
@@ -22,7 +46,14 @@ fn main() -> Result<()> {
             panic!("Usage: {} <cmd> [args...]", args[0]);
         }
     };
+    (
+        self_exe.to_string(),
+        cmd.to_string(),
+        maybe_args.map(|v| v.to_vec()),
+    )
+}
 
+fn setup_logging(self_exe: &str) -> Result<()> {
     if self_exe.starts_with("target/debug") {
         // If no debug set up, basic debugging in dev
         if std::env::var("RUST_DEBUG").is_err() {
@@ -39,6 +70,10 @@ fn main() -> Result<()> {
     color_eyre::install()?;
     pretty_env_logger::init();
 
+    Ok(())
+}
+
+fn load_rules(self_exe: &str) -> Result<Rules> {
     // Set up config file
     let config_file = if self_exe.starts_with("target/debug") {
         "boxxy-dev.yaml"
@@ -76,24 +111,8 @@ example rule:
       rewrite: "~/.config/aws"
         "#
         );
-        Rules {
-            rules: vec![]
-        }
+        Rules { rules: vec![] }
     };
-    info!("loaded {} rules", rules.rules.len());
 
-    // Do the do!
-    let mut command = Command::new(cmd);
-
-    // Pass through current env
-    command.envs(std::env::vars());
-
-    // Pass args
-    if let Some(args) = maybe_args {
-        command.args(args);
-    }
-
-    enclosure::Enclosure::new(rules, &mut command).run()?;
-
-    Ok(())
+    Ok(rules)
 }
