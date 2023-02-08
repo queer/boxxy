@@ -21,12 +21,12 @@ force it to puts its data somewhere nice and proper.
 ```sh
 git:(mistress) 1 | ▶  cat ~/.config/boxxy/boxxy.yaml
 rules:
-- name: "name aws cli write to ~/.config/aws"
+- name: "make aws cli write to ~/.config/aws"
   target: "~/.aws"
   rewrite: "~/.config/aws"
 git:(mistress) 1 | ▶  boxxy aws configure
  INFO  boxxy > loaded 1 rules
- INFO  boxxy::enclosure     > applying rule 'name aws cli write to ~/.config/aws'
+ INFO  boxxy::enclosure     > applying rule 'make aws cli write to ~/.config/aws'
  INFO  boxxy::enclosure     > applied rewrite ~/.config/aws => ~/.aws ("/home/amy/.config/aws" => "/tmp/boxxy-containers/bold-surf-9356/home/amy/.aws")
 AWS Access Key ID [****************a]: a
 AWS Secret Access Key [****************a]: a
