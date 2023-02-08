@@ -101,3 +101,60 @@ pub fn append_all(buf: &Path, parts: Vec<&str>) -> PathBuf {
     }
     buf
 }
+
+mod tests {
+    use super::*;
+
+    use color_eyre::Result;
+
+    #[test]
+    fn test_append_all() {
+        let buf = PathBuf::from("/tmp");
+        let parts = vec!["foo", "bar", "baz"];
+        let expected = PathBuf::from("/tmp/foo/bar/baz");
+        assert_eq!(append_all(&buf, parts), expected);
+    }
+
+    #[test]
+    fn test_fs_driver_creates_and_destroys_roots() -> Result<()> {
+        let driver = FsDriver::new();
+        let name = "test-create-destroy-root";
+        let root = driver.container_root(name);
+        driver.setup_root(name)?;
+        assert!(root.exists());
+        driver.cleanup_root(name)?;
+        assert!(!root.exists());
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_fs_driver_touches_files() -> Result<()> {
+        let driver = FsDriver::new();
+        let name = "test-touch-file";
+        let root = driver.container_root(name);
+        driver.setup_root(name)?;
+        let file = append_all(&root, vec!["foo"]);
+        driver.touch(&file)?;
+        assert!(file.exists());
+        driver.cleanup_root(name)?;
+        assert!(!root.exists());
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_fs_driver_touches_dirs() -> Result<()> {
+        let driver = FsDriver::new();
+        let name = "test-touch-dir";
+        let root = driver.container_root(name);
+        driver.setup_root(name)?;
+        let dir = append_all(&root, vec!["foo"]);
+        driver.touch_dir(&dir)?;
+        assert!(dir.exists());
+        driver.cleanup_root(name)?;
+        assert!(!root.exists());
+
+        Ok(())
+    }
+}
