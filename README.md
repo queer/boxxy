@@ -9,6 +9,13 @@ I recently had to use the AWS CLI. It wants to save data in `~/.aws`, but I
 don't want it to just clutter up my `$HOME` however it wants. boxxy lets me
 force it to puts its data somewhere nice and proper.
 
+## features
+
+- box any program and force it to put its files/directories where you want it to
+- context-dependent boxing, ie different rules apply in different directories
+  depending on your configuration
+- minimal overhead
+
 ## example usage
 
 ```sh
@@ -63,3 +70,12 @@ rules:
   # file. Required because the target file/directory may not exist yet.
   mode: "file"
 ```
+
+## how does it work?
+
+- create temporary directory in /tmp
+- set up new user/mount namespace
+- bind-mount `/` to tmp directory
+- bind-mount rule mounts rw so that target programs can use them
+- remount `/` ro
+- run!
