@@ -102,6 +102,7 @@ pub fn append_all(buf: &Path, parts: Vec<&str>) -> PathBuf {
     buf
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
