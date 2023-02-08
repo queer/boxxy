@@ -110,6 +110,8 @@ impl<'a> Enclosure<'a> {
                 continue;
             }
 
+            info!("applying rule '{}'", rule.name);
+
             let expanded_target = shellexpand::tilde(&rule.target).to_string();
             let expanded_target = Path::new(&expanded_target).canonicalize()?;
             let expanded_target = expanded_target.to_string_lossy();
@@ -119,10 +121,6 @@ impl<'a> Enclosure<'a> {
             let rewrite_path = shellexpand::tilde(&rule.rewrite).to_string();
             let rewrite_path = Path::new(&rewrite_path).canonicalize()?;
 
-            info!(
-                "applying rewrite {} => {} ({rewrite_path:?} => {target_path:?})",
-                rule.rewrite, rule.target
-            );
             match rule.mode {
                 RuleMode::File => {
                     self.ensure_file(Path::new(&rule.rewrite))?;
@@ -135,6 +133,11 @@ impl<'a> Enclosure<'a> {
                     self.fs.bind_mount_rw(&rewrite_path, target_path)?;
                 }
             }
+
+            info!(
+                "applied rewrite {} => {} ({rewrite_path:?} => {target_path:?})",
+                rule.rewrite, rule.target
+            );
         }
 
         // Chroot into container root
