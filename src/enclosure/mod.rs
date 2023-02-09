@@ -160,7 +160,8 @@ impl<'a> Enclosure<'a> {
         debug!("running command: {:?}", self.command.get_program());
         info!(
             "{}",
-            format!("boxed {:?} ♥", self.command.get_program()).fg::<PinkSalmon>()
+            format!("boxed {:?} ♥", self.command.get_program())
+                .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
         self.command.spawn()?.wait()?;
 

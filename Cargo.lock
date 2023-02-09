@@ -103,7 +103,7 @@ dependencies = [
 
 [[package]]
 name = "boxxy"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "atty",
  "color-eyre",
