@@ -18,9 +18,15 @@ rules:
 ```
 
 ```sh
-$ boxxy tmux
-# tmux config is now read from ~/.config/tmux/tmux.conf
-# :tada:
+git:(mistress) | ▶  boxxy tmux
+ INFO  boxxy > loaded 3 rules
+ INFO  boxxy::enclosure > applying rule 'Store AWS CLI config in ~/.config/aws'
+ INFO  boxxy::enclosure > redirect: ~/.aws -> ~/.config/aws
+ INFO  boxxy::enclosure > applying rule 'redirect tmux config from ~/.tmux.conf to ~/.config/tmux/tmux.conf'
+ INFO  boxxy::enclosure > redirect: ~/.tmux.conf -> ~/.config/tmux/tmux.conf
+ INFO  boxxy::enclosure > boxed "tmux" ♥
+[exited]
+git:(mistress) | ▶  # :tada:
 ```
 
 ## motivation
