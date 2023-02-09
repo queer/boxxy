@@ -2,6 +2,7 @@ use std::fs;
 use std::process::Command;
 
 use atty::Stream;
+use clap::Parser;
 use color_eyre::Result;
 use config::{Config, FileFormat};
 use log::*;
@@ -10,9 +11,19 @@ use crate::enclosure::rule::Rules;
 
 pub mod enclosure;
 
+#[derive(Parser)]
+pub struct Args {
+    #[arg(short = 'i', long = "immutable", default_value = "false")]
+    pub immutable_root: bool,
+    #[arg(trailing_var_arg = true)]
+    pub command_with_args: Vec<String>,
+}
+
 fn main() -> Result<()> {
     // Fetch command to run
-    let (self_exe, cmd, maybe_args) = collect_args();
+    let cfg = Args::parse();
+    let self_exe = std::env::current_exe()?;
+    let self_exe = self_exe.to_string_lossy();
     setup_logging(&self_exe)?;
 
     // Load rules
@@ -20,38 +31,25 @@ fn main() -> Result<()> {
     info!("loaded {} rules", rules.rules.len());
 
     // Do the do!
+    let (cmd, args) = (&cfg.command_with_args[0], &cfg.command_with_args[1..]);
     let mut command = Command::new(cmd);
 
     // Pass through current env
     command.envs(std::env::vars());
 
     // Pass args
-    if let Some(args) = maybe_args {
+    if !args.is_empty() {
         command.args(args);
     }
 
-    enclosure::Enclosure::new(rules, &mut command).run()?;
+    enclosure::Enclosure::new(enclosure::Opts {
+        rules,
+        command: &mut command,
+        immutable_root: cfg.immutable_root,
+    })
+    .run()?;
 
     Ok(())
-}
-
-fn collect_args() -> (String, String, Option<Vec<String>>) {
-    let args = std::env::args().collect::<Vec<String>>();
-    let (self_exe, cmd, maybe_args) = {
-        #[allow(clippy::comparison_chain)]
-        if args.len() == 2 {
-            (args[0].as_str(), args[1].as_str(), None)
-        } else if args.len() > 2 {
-            (args[0].as_str(), args[1].as_str(), Some(&args[2..]))
-        } else {
-            panic!("Usage: {} <cmd> [args...]", args[0]);
-        }
-    };
-    (
-        self_exe.to_string(),
-        cmd.to_string(),
-        maybe_args.map(|v| v.to_vec()),
-    )
 }
 
 fn setup_logging(self_exe: &str) -> Result<()> {

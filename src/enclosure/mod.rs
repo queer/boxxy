@@ -20,19 +20,27 @@ pub mod fs;
 pub mod rule;
 
 pub struct Enclosure<'a> {
-    pub command: &'a mut Command,
+    command: &'a mut Command,
     fs: FsDriver,
     name: String,
     rules: Rules,
+    immutable_root: bool,
+}
+
+pub struct Opts<'a> {
+    pub rules: Rules,
+    pub command: &'a mut Command,
+    pub immutable_root: bool,
 }
 
 impl<'a> Enclosure<'a> {
-    pub fn new(rules: Rules, command: &'a mut Command) -> Self {
+    pub fn new(opts: Opts<'a>) -> Self {
         Self {
-            command,
+            command: opts.command,
             fs: FsDriver::new(),
             name: Haikunator::default().haikunate(),
-            rules,
+            rules: opts.rules,
+            immutable_root: opts.immutable_root,
         }
     }
 
@@ -148,8 +156,10 @@ impl<'a> Enclosure<'a> {
         chroot(&self.fs.container_root(&self.name))?;
         chdir(&pwd)?;
         // Remount rootfs as ro
-        // debug!("remounting rootfs as ro!");
-        // self.fs.remount_ro(Path::new("/"))?;
+        if self.immutable_root {
+            debug!("remounting rootfs as ro!");
+            self.fs.remount_ro(Path::new("/"))?;
+        }
 
         debug!(
             "chrooted to {}",
