@@ -40,7 +40,8 @@ force it to puts its data somewhere nice and proper.
 - context-dependent boxing, ie different rules apply in different directories
   depending on your configuration
 - minimal overhead
-- opt-in immutable fs outside of rule rewrites
+- opt-in immutable fs outside of rule rewrites, ie only the files/directories
+  you specify in rules are writable
 
 ## example usage
 
