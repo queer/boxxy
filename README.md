@@ -19,27 +19,28 @@ force it to puts its data somewhere nice and proper.
 ## example usage
 
 ```sh
-git:(mistress) 1 | ▶  cat ~/.config/boxxy/boxxy.yaml
+git:(mistress) | ▶  cat ~/.config/boxxy/boxxy.yaml
 rules:
-- name: "make aws cli write to ~/.config/aws"
+- name: "Store AWS CLI config in ~/.config/aws"
   target: "~/.aws"
   rewrite: "~/.config/aws"
-git:(mistress) 1 | ▶  boxxy aws configure
+
+git:(mistress) | ▶  boxxy aws configure
  INFO  boxxy > loaded 1 rules
- INFO  boxxy::enclosure     > applying rule 'make aws cli write to ~/.config/aws'
- INFO  boxxy::enclosure     > applied rewrite ~/.config/aws => ~/.aws ("/home/amy/.config/aws" => "/tmp/boxxy-containers/bold-surf-9356/home/amy/.aws")
-AWS Access Key ID [****************a]: a
-AWS Secret Access Key [****************a]: a
-Default region name [a]: a
-Default output format [a]: a
-git:(mistress) 2 | ▶  ls ~/.aws
-git:(mistress) 2 | ▶  ls ~/.config/aws
+ INFO  boxxy::enclosure > applying rule 'Store AWS CLI config in ~/.config/aws'
+ INFO  boxxy::enclosure > redirect: ~/.aws -> ~/.config/aws
+AWS Access Key ID [****************a]: d
+AWS Secret Access Key [****************b]: c
+Default region name [c]: b
+Default output format [d]: a
+git:(mistress) | ▶  ls ~/.aws
+git:(mistress) | ▶  ls ~/.config/aws
 config  credentials
-git:(mistress) 2 | ▶  cat ~/.config/aws/config
+git:(mistress) | ▶  cat ~/.config/aws/config
 [default]
-region = a
+region = b
 output = a
-git:(mistress) 2 | ▶
+git:(mistress) | ▶
 ```
 
 ## configuration
