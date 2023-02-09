@@ -90,14 +90,17 @@ impl FsDriver {
     }
 }
 
-pub fn append_all(buf: &Path, parts: Vec<&str>) -> PathBuf {
+pub fn append_all<P: AsRef<Path>>(buf: &Path, parts: Vec<P>) -> PathBuf {
     let mut buf = buf.to_path_buf();
     for part in parts {
-        let part = match part.strip_prefix('/') {
-            Some(p) => p,
-            None => part,
+        let path = part.as_ref();
+        let path = if path.starts_with("/") {
+            path.strip_prefix("/").unwrap()
+        } else {
+            path
         };
-        buf.push(part);
+
+        buf.push(path);
     }
     buf
 }

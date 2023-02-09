@@ -112,9 +112,12 @@ impl<'a> Enclosure<'a> {
 
             info!("applying rule '{}'", rule.name);
 
-            let expanded_target = shellexpand::tilde(&rule.target).to_string();
-            let expanded_target = Path::new(&expanded_target).canonicalize()?;
-            let expanded_target = expanded_target.to_string_lossy();
+            let expanded_target = {
+                let expanded = shellexpand::tilde(&rule.target).to_string();
+                let canonicalised_path = Path::new(&expanded).canonicalize()?;
+                canonicalised_path
+            };
+
             let target_path = append_all(&container_root, vec![&expanded_target]).canonicalize()?;
             let target_path = target_path.as_path();
 
@@ -134,10 +137,8 @@ impl<'a> Enclosure<'a> {
                 }
             }
 
-            info!(
-                "applied rewrite {} => {} ({rewrite_path:?} => {target_path:?})",
-                rule.rewrite, rule.target
-            );
+            info!("redirect: {} -> {}", rule.target, rule.rewrite);
+            debug!("rewrote base bath {rewrite_path:?} => {target_path:?}");
         }
 
         // Chroot into container root
