@@ -31,17 +31,18 @@ git:(mistress) | ▶  boxxy aws configure
  INFO  boxxy > loaded 1 rules
  INFO  boxxy::enclosure > applying rule 'Store AWS CLI config in ~/.config/aws'
  INFO  boxxy::enclosure > redirect: ~/.aws -> ~/.config/aws
-AWS Access Key ID [****************a]: d
-AWS Secret Access Key [****************b]: c
-Default region name [c]: b
-Default output format [d]: a
+ INFO  boxxy::enclosure > boxed "aws" ♥
+AWS Access Key ID [****************d]: a
+AWS Secret Access Key [****************c]: b
+Default region name [b]: c
+Default output format [a]: d
 git:(mistress) | ▶  ls ~/.aws
 git:(mistress) | ▶  ls ~/.config/aws
 config  credentials
 git:(mistress) | ▶  cat ~/.config/aws/config
 [default]
-region = b
-output = a
+region = c
+output = d
 git:(mistress) | ▶
 ```
 
