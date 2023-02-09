@@ -17,6 +17,10 @@ pub struct Args {
     pub immutable_root: bool,
     #[arg(trailing_var_arg = true)]
     pub command_with_args: Vec<String>,
+    #[arg(short = 'l', long = "log-level", default_value = "info")]
+    pub log_level: String,
+    #[arg(long = "force-colour", default_value = "false")]
+    pub force_colour: bool,
 }
 
 fn main() -> Result<()> {
@@ -24,7 +28,7 @@ fn main() -> Result<()> {
     let cfg = Args::parse();
     let self_exe = std::env::current_exe()?;
     let self_exe = self_exe.to_string_lossy();
-    setup_logging(&self_exe)?;
+    setup_logging(&cfg, &self_exe)?;
 
     // Load rules
     let rules = load_rules(&self_exe)?;
@@ -42,6 +46,7 @@ fn main() -> Result<()> {
         command.args(args);
     }
 
+    // Do the thing!
     enclosure::Enclosure::new(enclosure::Opts {
         rules,
         command: &mut command,
@@ -52,7 +57,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn setup_logging(self_exe: &str) -> Result<()> {
+fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
     if self_exe.starts_with("target/debug") {
         // If no debug set up, basic debugging in dev
         if std::env::var("RUST_DEBUG").is_err() {
@@ -62,12 +67,11 @@ fn setup_logging(self_exe: &str) -> Result<()> {
             std::env::set_var("RUST_LOG", "debug");
         }
     } else if std::env::var("RUST_LOG").is_err() {
-        std::env::set_var("RUST_LOG", "info");
+        std::env::set_var("RUST_LOG", &cfg.log_level);
     }
 
-    if atty::isnt(Stream::Stdin) {
+    if atty::isnt(Stream::Stdin) && !cfg.force_colour {
         // Disable user-friendliness if we're not outputting to a terminal.
-        // TODO: Should this be optional behaviour?
         std::env::set_var("NO_COLOR", "1");
         std::env::set_var("RUST_LOG", "warn");
         std::env::remove_var("RUST_DEBUG");
