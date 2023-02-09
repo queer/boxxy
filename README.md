@@ -43,6 +43,12 @@ output = a
 git:(mistress) | ▶
 ```
 
+### suggested usage
+
+- `alias aws="boxxy aws"` (repeat for other clouds)
+- use contexts to keep project configs separate on disk
+- stop using symlinks!!!
+
 ## configuration
 
 The boxxy configuration file lives in `~/.config/boxxy/boxxy.yaml`. If none
