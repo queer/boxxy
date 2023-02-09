@@ -11,7 +11,16 @@ use crate::enclosure::rule::Rules;
 
 pub mod enclosure;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 #[derive(Parser)]
+#[command(
+    name = "boxxy",
+    display_name = "boxxy",
+    about = "Put bad programs in a box with only their files.",
+    long_about = "boxxy forces bad programs to put their files somewhere else via Linux user namespaces.",
+    version = VERSION,
+)]
 pub struct Args {
     #[arg(
         short = 'i',
@@ -20,7 +29,12 @@ pub struct Args {
         help = "Make the root filesystem immutable."
     )]
     pub immutable_root: bool,
-    #[arg(trailing_var_arg = true)]
+    #[arg(
+        trailing_var_arg = true,
+        name = "COMMAND TO RUN",
+        required = true,
+        help = "The command to run, ex. `ls -lah` or `aws configure`."
+    )]
     pub command_with_args: Vec<String>,
     #[arg(short = 'l', long = "log-level", default_value = "info")]
     pub log_level: String,
