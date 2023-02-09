@@ -109,14 +109,14 @@ rules:
 
 ```yaml
 rules:
-- name: "any valid string"
-  target: "path"
-  rewrite: "path"
-  context:
+- name: "any valid string" # required
+  target: "path" # required
+  rewrite: "path" # required
+  context: # optional
   - "path"
   - "path"
-  mode: "directory | file"
-  only:
+  mode: "directory | file" # optional
+  only: # optional
   - "binary name"
   - "binary name"
 ```
