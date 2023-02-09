@@ -23,6 +23,7 @@ git:(mistress) | ▶  boxxy tmux
  INFO  boxxy::enclosure > applying rule 'redirect tmux config from ~/.tmux.conf to ~/.config/tmux/tmux.conf'
  INFO  boxxy::enclosure > redirect: ~/.tmux.conf -> ~/.config/tmux/tmux.conf
  INFO  boxxy::enclosure > boxed "tmux" ♥
+# do things with tmux here
 [exited]
 git:(mistress) | ▶  # :tada:
 ```
