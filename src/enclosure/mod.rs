@@ -148,8 +148,8 @@ impl<'a> Enclosure<'a> {
         chroot(&self.fs.container_root(&self.name))?;
         chdir(&pwd)?;
         // Remount rootfs as ro
-        debug!("remounting rootfs as ro!");
-        self.fs.remount_ro(Path::new("/"))?;
+        // debug!("remounting rootfs as ro!");
+        // self.fs.remount_ro(Path::new("/"))?;
 
         debug!(
             "chrooted to {}",
