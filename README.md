@@ -17,16 +17,7 @@ rules:
   mode: "file"
 ```
 
-```sh
-git:(mistress) | ▶  boxxy tmux
- INFO  boxxy > loaded 1 rules
- INFO  boxxy::enclosure > applying rule 'redirect tmux config from ~/.tmux.conf to ~/.config/tmux/tmux.conf'
- INFO  boxxy::enclosure > redirect: ~/.tmux.conf -> ~/.config/tmux/tmux.conf
- INFO  boxxy::enclosure > boxed "tmux" ♥
-# do things with tmux here
-[exited]
-git:(mistress) | ▶  # :tada:
-```
+[![asciicast](https://asciinema.org/a/558679.svg)](https://asciinema.org/a/558679)
 
 ## motivation
 
