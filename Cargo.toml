@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+atty = "0.2.14"
 color-eyre = { version = "0.6.2", features = ["issue-url"] }
 config = "0.13.3"
 ctrlc = "3.2.5"
@@ -13,6 +14,7 @@ dirs = "4.0.0"
 haikunator = "0.1.2"
 log = "0.4.17"
 nix = "0.26.2"
+owo-colors = { version = "3.5.0", features = ["supports-color", "supports-colors"] }
 pretty_env_logger = "0.4.0"
 rlimit = "0.9.1"
 serde = { version = "1.0.152", features = ["derive"] }

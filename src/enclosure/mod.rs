@@ -9,6 +9,8 @@ use log::*;
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitStatus};
 use nix::unistd::{chdir, chroot};
+use owo_colors::colors::xterm::PinkSalmon;
+use owo_colors::OwoColorize;
 use rlimit::Resource;
 
 use self::fs::{append_all, FsDriver};
@@ -126,12 +128,12 @@ impl<'a> Enclosure<'a> {
 
             match rule.mode {
                 RuleMode::File => {
-                    self.ensure_file(Path::new(&rule.rewrite))?;
+                    self.ensure_file(&rewrite_path)?;
                     self.ensure_file(target_path)?;
                     self.fs.bind_mount_rw(&rewrite_path, target_path)?;
                 }
                 RuleMode::Directory => {
-                    self.ensure_directory(Path::new(&rule.rewrite))?;
+                    self.ensure_directory(&rewrite_path)?;
                     self.ensure_directory(target_path)?;
                     self.fs.bind_mount_rw(&rewrite_path, target_path)?;
                 }
@@ -156,6 +158,10 @@ impl<'a> Enclosure<'a> {
 
         // Do the needful!
         debug!("running command: {:?}", self.command.get_program());
+        info!(
+            "{}",
+            format!("boxed {:?} ♥", self.command.get_program()).fg::<PinkSalmon>()
+        );
         self.command.spawn()?.wait()?;
 
         Ok(())

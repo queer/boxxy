@@ -1,6 +1,7 @@
 use std::fs;
 use std::process::Command;
 
+use atty::Stream;
 use color_eyre::Result;
 use config::{Config, FileFormat};
 use log::*;
@@ -64,6 +65,14 @@ fn setup_logging(self_exe: &str) -> Result<()> {
         }
     } else if std::env::var("RUST_LOG").is_err() {
         std::env::set_var("RUST_LOG", "info");
+    }
+
+    if atty::isnt(Stream::Stdin) {
+        // Disable user-friendliness if we're not outputting to a terminal.
+        // TODO: Should this be optional behaviour?
+        std::env::set_var("NO_COLOR", "1");
+        std::env::set_var("RUST_LOG", "warn");
+        std::env::remove_var("RUST_DEBUG");
     }
 
     // Set up basics
