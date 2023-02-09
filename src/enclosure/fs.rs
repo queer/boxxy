@@ -23,16 +23,19 @@ impl FsDriver {
     }
 
     pub fn setup_root(&self, name: &str) -> Result<()> {
+        debug!("setting up root for {}", name);
         fs::create_dir_all(self.container_root(name))?;
         Ok(())
     }
 
     pub fn cleanup_root(&self, name: &str) -> Result<()> {
+        debug!("cleaning up root for {}", name);
         fs::remove_dir_all(self.container_root(name))?;
         Ok(())
     }
 
     pub fn bind_mount_ro(&self, src: &Path, target: &Path) -> Result<()> {
+        debug!("bind mount {src:?} onto {target:?} as ro");
         // ro bindmount is a complicated procedure: https://unix.stackexchange.com/a/128388
         // tldr: You first do a normal bindmount, then remount bind+ro
         self.bind_mount(src, target, MsFlags::MS_BIND)?;
@@ -53,6 +56,7 @@ impl FsDriver {
     }
 
     pub fn bind_mount_rw(&self, src: &Path, target: &Path) -> Result<()> {
+        debug!("bind mount {src:?} onto {target:?} as rw");
         self.bind_mount(src, target, MsFlags::MS_BIND)
     }
 
@@ -69,6 +73,7 @@ impl FsDriver {
     }
 
     pub fn touch(&self, path: &Path) -> Result<()> {
+        debug!("touching {path:?}");
         match OpenOptions::new().create(true).write(true).open(path) {
             Ok(_) => Ok(()),
             Err(e) => Err(e.into()),
@@ -76,13 +81,7 @@ impl FsDriver {
     }
 
     pub fn touch_dir(&self, path: &Path) -> Result<()> {
-        match fs::create_dir_all(path) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(e.into()),
-        }
-    }
-
-    pub fn touch_dir_sync(&self, path: &Path) -> Result<()> {
+        debug!("touching dir {path:?}");
         match fs::create_dir_all(path) {
             Ok(_) => Ok(()),
             Err(e) => Err(e.into()),

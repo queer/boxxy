@@ -36,6 +36,7 @@ fn empty_vec<T>() -> Vec<T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum RuleMode {
     File,
     Directory,

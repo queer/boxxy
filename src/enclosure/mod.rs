@@ -124,16 +124,34 @@ impl<'a> Enclosure<'a> {
 
             let expanded_target = {
                 let expanded = shellexpand::tilde(&rule.target).to_string();
-                let canonicalised_path = Path::new(&expanded).canonicalize()?;
-                canonicalised_path
+                match Path::new(&expanded).canonicalize() {
+                    Ok(path) => path,
+                    Err(_) => {
+                        // If the path doesn't exist, we'll create it
+                        PathBuf::from(&expanded)
+                    }
+                }
             };
 
-            let target_path = append_all(&container_root, vec![&expanded_target]).canonicalize()?;
+            let target_path =
+                match append_all(&container_root, vec![&expanded_target]).canonicalize() {
+                    Ok(path) => path,
+                    Err(_) => {
+                        // If the path doesn't exist, we'll create it
+                        append_all(&container_root, vec![&expanded_target])
+                    }
+                };
             let target_path = target_path.as_path();
             let target_path = self.maybe_resolve_symlink(target_path)?;
 
             let rewrite_path = shellexpand::tilde(&rule.rewrite).to_string();
-            let rewrite_path = Path::new(&rewrite_path).canonicalize()?;
+            let rewrite_path = match Path::new(&rewrite_path).canonicalize() {
+                Ok(path) => path,
+                Err(_) => {
+                    // If the path doesn't exist, we'll create it
+                    PathBuf::from(&rewrite_path)
+                }
+            };
             let rewrite_path = self.maybe_resolve_symlink(&rewrite_path)?;
 
             match rule.mode {

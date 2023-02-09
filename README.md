@@ -5,6 +5,24 @@ to put their files and directories in the right place, **without symlinks!**
 
 Linux-only! boxxy uses Linux namespaces for its functionality.
 
+For example, consider tmux. It wants to put its config in `~/.tmux.conf`. With
+boxxy, you can put its config in `~/.config/tmux/tmux.conf` instead:
+
+```yaml
+# ~/.config/boxxy/boxxy.yaml
+rules:
+- name: "redirect tmux config from ~/.tmux.conf to ~/.config/tmux/tmux.conf"
+  target: "~/.tmux.conf"
+  rewrite: "~/.config/tmux/tmux.conf"
+  mode: "file"
+```
+
+```sh
+$ boxxy tmux
+# tmux config is now read from ~/.config/tmux/tmux.conf
+# :tada:
+```
+
 ## motivation
 
 I recently had to use the AWS CLI. It wants to save data in `~/.aws`, but I
@@ -51,6 +69,7 @@ git:(mistress) | ▶
 
 - `alias aws="boxxy aws"` (repeat for other clouds)
 - use contexts to keep project configs separate on disk
+- dotfiles!
 - stop using symlinks!!!
 
 ## configuration
