@@ -71,7 +71,7 @@ impl<'a> Enclosure<'a> {
                 nix::unistd::Pid::from_raw(pid_clone),
                 nix::sys::signal::SIGTERM,
             );
-            FsDriver::new().cleanup_root(&name_clone).unwrap();
+            FsDriver::new().cleanup_root(&name_clone);
         })?;
 
         // Wait for exit
