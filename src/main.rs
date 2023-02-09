@@ -13,13 +13,22 @@ pub mod enclosure;
 
 #[derive(Parser)]
 pub struct Args {
-    #[arg(short = 'i', long = "immutable", default_value = "false")]
+    #[arg(
+        short = 'i',
+        long = "immutable",
+        default_value = "false",
+        help = "Make the root filesystem immutable."
+    )]
     pub immutable_root: bool,
     #[arg(trailing_var_arg = true)]
     pub command_with_args: Vec<String>,
     #[arg(short = 'l', long = "log-level", default_value = "info")]
     pub log_level: String,
-    #[arg(long = "force-colour", default_value = "false")]
+    #[arg(
+        long = "force-colour",
+        default_value = "false",
+        help = "Force colour output even when stdout is not a tty."
+    )]
     pub force_colour: bool,
 }
 

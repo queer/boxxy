@@ -17,6 +17,7 @@ force it to puts its data somewhere nice and proper.
 - context-dependent boxing, ie different rules apply in different directories
   depending on your configuration
 - minimal overhead
+- opt-in immutable fs outside of rule rewrites
 
 ## example usage
 
