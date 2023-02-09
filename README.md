@@ -105,6 +105,22 @@ rules:
   - "kubectl"
 ```
 
+### syntax
+
+```yaml
+rules:
+- name: "any valid string"
+  target: "path"
+  rewrite: "path"
+  context:
+  - "path"
+  - "path"
+  mode: "directory | file"
+  only:
+  - "binary name"
+  - "binary name"
+```
+
 ## developing
 
 1. set up pre-commit: `pre-commit install`
