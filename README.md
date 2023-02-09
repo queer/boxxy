@@ -79,6 +79,10 @@ rules:
   # default. Must be specified for the correct behaviour when the target is a
   # file. Required because the target file/directory may not exist yet.
   mode: "file"
+  # The list of commands that this rule applies to. If no commands are
+  # specified, the rule applies to all programs run with boxxy.
+  only:
+  - "kubectl"
 ```
 
 ## developing

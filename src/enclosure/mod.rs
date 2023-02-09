@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::thread;
 use std::time::Duration;
@@ -130,20 +130,22 @@ impl<'a> Enclosure<'a> {
 
             let target_path = append_all(&container_root, vec![&expanded_target]).canonicalize()?;
             let target_path = target_path.as_path();
+            let target_path = self.maybe_resolve_symlink(target_path)?;
 
             let rewrite_path = shellexpand::tilde(&rule.rewrite).to_string();
             let rewrite_path = Path::new(&rewrite_path).canonicalize()?;
+            let rewrite_path = self.maybe_resolve_symlink(&rewrite_path)?;
 
             match rule.mode {
                 RuleMode::File => {
                     self.ensure_file(&rewrite_path)?;
-                    self.ensure_file(target_path)?;
-                    self.fs.bind_mount_rw(&rewrite_path, target_path)?;
+                    self.ensure_file(&target_path)?;
+                    self.fs.bind_mount_rw(&rewrite_path, &target_path)?;
                 }
                 RuleMode::Directory => {
                     self.ensure_directory(&rewrite_path)?;
-                    self.ensure_directory(target_path)?;
-                    self.fs.bind_mount_rw(&rewrite_path, target_path)?;
+                    self.ensure_directory(&target_path)?;
+                    self.fs.bind_mount_rw(&rewrite_path, &target_path)?;
                 }
             }
 
@@ -178,6 +180,16 @@ impl<'a> Enclosure<'a> {
         Ok(())
     }
 
+    fn maybe_resolve_symlink(&self, path: &Path) -> Result<PathBuf> {
+        let path = if path.is_symlink() {
+            path.read_link()?.canonicalize()?
+        } else {
+            path.to_path_buf()
+        };
+
+        Ok(path)
+    }
+
     fn ensure_file(&self, path: &Path) -> Result<()> {
         self.fs.touch_dir(path.parent().unwrap())?;
         self.fs.touch(path)?;
@@ -197,12 +209,21 @@ impl<'a> Enclosure<'a> {
         }
 
         for context in &rule.context {
+            debug!("{}: resolving context: {}", rule.name, context);
             let expanded_context = shellexpand::tilde(&context).to_string();
             let expanded_context = Path::new(&expanded_context).canonicalize()?;
+            let resolved_context = self.maybe_resolve_symlink(&expanded_context)?;
 
             let pwd = std::env::current_dir()?;
 
-            if pwd.starts_with(&expanded_context) {
+            debug!(
+                "{}: {} <> {}",
+                rule.name,
+                pwd.display(),
+                resolved_context.display()
+            );
+
+            if pwd.starts_with(&resolved_context) {
                 return Ok(true);
             }
         }

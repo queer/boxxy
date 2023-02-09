@@ -26,8 +26,7 @@ pub struct Args {
 fn main() -> Result<()> {
     // Fetch command to run
     let cfg = Args::parse();
-    let self_exe = std::env::current_exe()?;
-    let self_exe = self_exe.to_string_lossy();
+    let self_exe = std::env::args().next().unwrap();
     setup_logging(&cfg, &self_exe)?;
 
     // Load rules
@@ -91,6 +90,7 @@ fn load_rules(self_exe: &str) -> Result<Rules> {
     } else {
         "boxxy.yaml"
     };
+    debug!("loading config: {}", config_file);
     let config_path =
         crate::enclosure::fs::append_all(&dirs::config_dir().unwrap(), vec!["boxxy", config_file]);
     fs::create_dir_all(config_path.parent().unwrap())?;
