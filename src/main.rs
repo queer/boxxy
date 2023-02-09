@@ -100,7 +100,10 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
     }
 
     // Set up basics
-    color_eyre::install()?;
+    color_eyre::config::HookBuilder::new()
+        .issue_url(concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"))
+        .add_issue_metadata("version", env!("CARGO_PKG_VERSION"))
+        .install()?;
     pretty_env_logger::init();
 
     Ok(())
