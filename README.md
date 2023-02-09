@@ -64,7 +64,7 @@ git:(mistress) | ▶
 
 ### suggested usage
 
-- `alias aws="boxxy aws"` (repeat for other clouds)
+- `alias aws="boxxy aws"` (repeat for other tools)
 - use contexts to keep project configs separate on disk
 - dotfiles!
 - stop using symlinks!!!
