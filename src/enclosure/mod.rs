@@ -103,6 +103,23 @@ impl<'a> Enclosure<'a> {
         Ok(())
     }
 
+    fn fully_expand_path(&self, path: &String) -> Result<PathBuf> {
+        let expanded = shellexpand::tilde(&path).to_string();
+        match Path::new(&expanded).canonicalize() {
+            Ok(path) => match self.maybe_resolve_symlink(&path) {
+                Ok(path) => match path.canonicalize() {
+                    Ok(canonical_path) => Ok(canonical_path),
+                    Err(_) => Ok(path),
+                },
+                err @ Err(_) => err,
+            },
+            Err(_) => {
+                // If the path doesn't exist, we'll create it
+                Ok(PathBuf::from(&expanded))
+            }
+        }
+    }
+
     fn run_in_container(&mut self) -> Result<()> {
         // Mount root RW
         debug!("setup root");
@@ -120,19 +137,15 @@ impl<'a> Enclosure<'a> {
                 continue;
             }
 
+            if !self.applies_to_binary(rule)? {
+                debug!("not applying rule '{}' because of binary", rule.name);
+                continue;
+            }
+
             info!("applying rule '{}'", rule.name);
 
-            let expanded_target = {
-                let expanded = shellexpand::tilde(&rule.target).to_string();
-                match Path::new(&expanded).canonicalize() {
-                    Ok(path) => path,
-                    Err(_) => {
-                        // If the path doesn't exist, we'll create it
-                        PathBuf::from(&expanded)
-                    }
-                }
-            };
-
+            let expanded_target = self.fully_expand_path(&rule.target)?;
+            // Rewrite target path into the container
             let target_path =
                 match append_all(&container_root, vec![&expanded_target]).canonicalize() {
                     Ok(path) => path,
@@ -144,15 +157,7 @@ impl<'a> Enclosure<'a> {
             let target_path = target_path.as_path();
             let target_path = self.maybe_resolve_symlink(target_path)?;
 
-            let rewrite_path = shellexpand::tilde(&rule.rewrite).to_string();
-            let rewrite_path = match Path::new(&rewrite_path).canonicalize() {
-                Ok(path) => path,
-                Err(_) => {
-                    // If the path doesn't exist, we'll create it
-                    PathBuf::from(&rewrite_path)
-                }
-            };
-            let rewrite_path = self.maybe_resolve_symlink(&rewrite_path)?;
+            let rewrite_path = self.fully_expand_path(&rule.rewrite)?;
 
             match rule.mode {
                 RuleMode::File => {
@@ -242,6 +247,30 @@ impl<'a> Enclosure<'a> {
             );
 
             if pwd.starts_with(&resolved_context) {
+                return Ok(true);
+            }
+        }
+
+        Ok(false)
+    }
+
+    fn applies_to_binary(&self, rule: &Rule) -> Result<bool> {
+        if rule.only.is_empty() {
+            return Ok(true);
+        }
+
+        let program = self.command.get_program();
+
+        for binary in &rule.only {
+            debug!("{}: resolving binary: {}", rule.name, binary);
+            let expanded_binary = shellexpand::tilde(&binary).to_string();
+            let expanded_binary = match Path::new(&expanded_binary).canonicalize() {
+                Ok(path) => path,
+                Err(_) => PathBuf::from(&expanded_binary),
+            };
+            let resolved_binary = self.maybe_resolve_symlink(&expanded_binary)?;
+
+            if program == resolved_binary.file_name().unwrap() {
                 return Ok(true);
             }
         }
