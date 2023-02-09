@@ -23,4 +23,3 @@ shellexpand = "3.0.0"
 inherits = "release"
 debug = true
 split-debuginfo = "packed"
-

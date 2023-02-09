@@ -71,7 +71,14 @@ rules:
   mode: "file"
 ```
 
-## how does it work?
+## developing
+
+1. set up pre-commit: `pre-commit install`
+2. make sure it builds: `cargo build`
+3. do the thing!
+4. test with the command of your choice, ex. `cargo run -- ls -lah ~/.config`
+
+### how does it work?
 
 - create temporary directory in /tmp
 - set up new user/mount namespace

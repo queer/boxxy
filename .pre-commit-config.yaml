@@ -1,0 +1,42 @@
+---
+repos:
+- repo: "https://github.com/pre-commit/pre-commit-hooks"
+  rev: "v4.3.0"
+  hooks:
+  - id: "check-merge-conflict"
+  - id: "check-toml"
+  - id: "check-yaml"
+  - id: "end-of-file-fixer"
+  - id: "mixed-line-ending"
+  - id: "trailing-whitespace"
+- repo: "local"
+  hooks:
+  - id: "format"
+    name: "rust: cargo fmt"
+    entry: "cargo fmt --all --check"
+    language: "system"
+    pass_filenames: false
+    files: ".rs*$"
+  - id: "clippy"
+    name: "rust: cargo clippy"
+    entry: "cargo clippy --all-targets --all-features -- -D warnings"
+    language: "system"
+    pass_filenames: false
+    files: ".rs*$"
+  - id: "test"
+    name: "rust: cargo test"
+    entry: "cargo test"
+    language: "system"
+    pass_filenames: false
+    files: ".rs*$"
+  - id: "doc"
+    name: "rust: cargo doc"
+    entry: "cargo doc --workspace --all-features --examples --no-deps --locked --frozen"
+    language: "system"
+    pass_filenames: false
+    files: ".rs*$"
+  - id: "audit"
+    name: "rust: cargo audit"
+    entry: "cargo audit -q"
+    language: "system"
+    pass_filenames: false
