@@ -1,7 +1,7 @@
 # boxxy
 
 boxxy is a tool for boxing up misbehaving Linux applications and forcing them
-to put their files and directories in the right place.
+to put their files and directories in the right place, **without symlinks!**
 
 Linux-only! boxxy uses Linux namespaces for its functionality.
 
