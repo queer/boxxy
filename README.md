@@ -34,6 +34,12 @@ force it to puts its data somewhere nice and proper.
 - opt-in immutable fs outside of rule rewrites, ie only the files/directories
   you specify in rules are writable
 
+### potential drawbacks
+
+- new project, 0.x.y, comes with all those warnings
+- **cannot** use sudo inside the container
+- primarily tested for my use-cases
+
 ## example usage
 
 ```sh
