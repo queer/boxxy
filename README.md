@@ -37,7 +37,7 @@ force it to puts its data somewhere nice and proper.
 ### potential drawbacks
 
 - new project, 0.x.y, comes with all those warnings
-- **cannot** use sudo inside the container
+- **cannot** use sudo inside the container (see #6)
 - primarily tested for my use-cases
 
 ## example usage
