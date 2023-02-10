@@ -70,6 +70,31 @@ impl<'a> Enclosure<'a> {
             return Err(std::io::Error::last_os_error().into());
         }
 
+        // Get current UID + GID
+        let uid = nix::unistd::getuid();
+        let gid = nix::unistd::getgid();
+
+        // Call newuidmap + newgidmap
+        let newuidmap = Command::new("newuidmap")
+            .arg(pid.as_raw().to_string())
+            .arg(uid.to_string())
+            .arg(uid.to_string())
+            .arg("1")
+            .output();
+        if newuidmap.is_err() {
+            return newuidmap.map(|_| ()).map_err(|e| e.into());
+        }
+
+        let newgidmap = Command::new("newgidmap")
+            .arg(pid.as_raw().to_string())
+            .arg(gid.to_string())
+            .arg(gid.to_string())
+            .arg("1")
+            .output();
+        if newgidmap.is_err() {
+            return newgidmap.map(|_| ()).map_err(|e| e.into());
+        }
+
         // Set up ^C handling
         let name_clone = self.name.clone();
         let pid_clone = pid.as_raw();
