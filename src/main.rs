@@ -118,7 +118,7 @@ fn load_rules(self_exe: &str) -> Result<Rules> {
     };
     debug!("loading config: {}", config_file);
     let config_path =
-        crate::enclosure::fs::append_all(&dirs::config_dir().unwrap(), vec!["boxxy", config_file]);
+        enclosure::fs::append_all(&dirs::config_dir().unwrap(), vec!["boxxy", config_file]);
     fs::create_dir_all(config_path.parent().unwrap())?;
     if !config_path.exists() {
         info!("no config file found!");

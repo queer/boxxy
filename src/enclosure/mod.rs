@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 use std::thread;
 use std::time::Duration;
@@ -103,23 +103,6 @@ impl<'a> Enclosure<'a> {
         Ok(())
     }
 
-    fn fully_expand_path(&self, path: &String) -> Result<PathBuf> {
-        let expanded = shellexpand::tilde(&path).to_string();
-        match Path::new(&expanded).canonicalize() {
-            Ok(path) => match self.maybe_resolve_symlink(&path) {
-                Ok(path) => match path.canonicalize() {
-                    Ok(canonical_path) => Ok(canonical_path),
-                    Err(_) => Ok(path),
-                },
-                err @ Err(_) => err,
-            },
-            Err(_) => {
-                // If the path doesn't exist, we'll create it
-                Ok(PathBuf::from(&expanded))
-            }
-        }
-    }
-
     fn run_in_container(&mut self) -> Result<()> {
         // Mount root RW
         debug!("setup root");
@@ -144,7 +127,7 @@ impl<'a> Enclosure<'a> {
 
             info!("applying rule '{}'", rule.name);
 
-            let expanded_target = self.fully_expand_path(&rule.target)?;
+            let expanded_target = self.fs.fully_expand_path(&rule.target)?;
             // Rewrite target path into the container
             let target_path =
                 match append_all(&container_root, vec![&expanded_target]).canonicalize() {
@@ -155,9 +138,9 @@ impl<'a> Enclosure<'a> {
                     }
                 };
             let target_path = target_path.as_path();
-            let target_path = self.maybe_resolve_symlink(target_path)?;
+            let target_path = self.fs.maybe_resolve_symlink(target_path)?;
 
-            let rewrite_path = self.fully_expand_path(&rule.rewrite)?;
+            let rewrite_path = self.fs.fully_expand_path(&rule.rewrite)?;
 
             match rule.mode {
                 RuleMode::File => {
@@ -203,25 +186,23 @@ impl<'a> Enclosure<'a> {
         Ok(())
     }
 
-    fn maybe_resolve_symlink(&self, path: &Path) -> Result<PathBuf> {
-        let path = if path.is_symlink() {
-            path.read_link()?.canonicalize()?
-        } else {
-            path.to_path_buf()
-        };
-
-        Ok(path)
-    }
-
     fn ensure_file(&self, path: &Path) -> Result<()> {
-        self.fs.touch_dir(path.parent().unwrap())?;
-        self.fs.touch(path)?;
+        if !path.exists() {
+            if let Some(parent) = path.parent() {
+                if !parent.exists() {
+                    self.fs.touch_dir(parent)?;
+                }
+            }
+            self.fs.touch(path)?;
+        }
 
         Ok(())
     }
 
     fn ensure_directory(&self, path: &Path) -> Result<()> {
-        self.fs.touch_dir(path)?;
+        if !path.exists() {
+            self.fs.touch_dir(path)?;
+        }
 
         Ok(())
     }
@@ -235,7 +216,7 @@ impl<'a> Enclosure<'a> {
             debug!("{}: resolving context: {}", rule.name, context);
             let expanded_context = shellexpand::tilde(&context).to_string();
             let expanded_context = Path::new(&expanded_context).canonicalize()?;
-            let resolved_context = self.maybe_resolve_symlink(&expanded_context)?;
+            let resolved_context = self.fs.maybe_resolve_symlink(&expanded_context)?;
 
             let pwd = std::env::current_dir()?;
 
@@ -263,12 +244,8 @@ impl<'a> Enclosure<'a> {
 
         for binary in &rule.only {
             debug!("{}: resolving binary: {}", rule.name, binary);
-            let expanded_binary = shellexpand::tilde(&binary).to_string();
-            let expanded_binary = match Path::new(&expanded_binary).canonicalize() {
-                Ok(path) => path,
-                Err(_) => PathBuf::from(&expanded_binary),
-            };
-            let resolved_binary = self.maybe_resolve_symlink(&expanded_binary)?;
+            let expanded_binary = self.fs.fully_expand_path(binary)?;
+            let resolved_binary = self.fs.maybe_resolve_symlink(&expanded_binary)?;
 
             if program == resolved_binary.file_name().unwrap() {
                 return Ok(true);
