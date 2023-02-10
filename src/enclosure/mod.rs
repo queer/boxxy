@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+use std::ffi::CString;
 use std::path::Path;
-use std::process::Command;
+use std::process::{exit, Command};
 use std::thread;
 use std::time::Duration;
 
@@ -7,10 +9,12 @@ use color_eyre::Result;
 use haikunator::Haikunator;
 use log::*;
 use nix::sched::{clone, CloneFlags};
-use nix::sys::wait::{waitpid, WaitStatus};
-use nix::unistd::{chdir, chroot, Gid, Uid};
+use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
+use nix::sys::{ptrace, signal};
+use nix::unistd::{chdir, chroot, getgrouplist, getpid, Gid, Uid, User};
 use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
+use regex::Regex;
 use rlimit::Resource;
 
 use self::fs::{append_all, FsDriver};
@@ -25,6 +29,8 @@ pub struct Enclosure<'a> {
     name: String,
     rules: Rules,
     immutable_root: bool,
+    #[allow(unused)]
+    child_exit_status: i32,
 }
 
 pub struct Opts<'a> {
@@ -41,6 +47,7 @@ impl<'a> Enclosure<'a> {
             name: Haikunator::default().haikunate(),
             rules: opts.rules,
             immutable_root: opts.immutable_root,
+            child_exit_status: -1,
         }
     }
 
@@ -70,19 +77,48 @@ impl<'a> Enclosure<'a> {
             return Err(std::io::Error::last_os_error().into());
         }
 
+        // Await PTRACE_TRACEME from child
+        waitpid(pid, Some(WaitPidFlag::WSTOPPED))?;
+        debug!("child stopped!");
+
         // Map current UID + GID into the container so that things continue to
         // work as expected.
 
         // Get current UID + GID
-        let uid = nix::unistd::getuid();
-        let gid = nix::unistd::getgid();
+        let uid = nix::unistd::geteuid();
+        let gid = nix::unistd::getegid();
 
         // Call newuidmap + newgidmap
-        self.map_uid(pid, uid, uid)?;
-        self.map_gid(pid, gid, gid)?;
 
-        self.map_uid(pid, Uid::from_raw(0), uid)?;
-        self.map_gid(pid, Gid::from_raw(0), gid)?;
+        // TODO: This is hacky. I don't like this.
+        // It's... difficult... to map uids/gids properly. There is a proper
+        // mechanism for doing so, but it's a part of the `shadow` package, and
+        // I don't want to generate C bindings right now. Instead, this just
+        // tries to map them over and over, removing broken uids/gids until it
+        // happens to work.
+        // This isn't optimal, but it works.
+        if let Some(user) = User::from_uid(uid)? {
+            let mut uid_map = HashMap::new();
+            uid_map.insert(user.uid, user.uid);
+            uid_map.insert(Uid::from_raw(0), Uid::from_raw(0));
+
+            Self::map_uids(pid, &mut uid_map)?;
+
+            let mut gid_map = HashMap::new();
+            gid_map.insert(user.gid, user.gid);
+            gid_map.insert(Gid::from_raw(0), Gid::from_raw(0));
+            getgrouplist(&CString::new(user.name)?, gid)?
+                .iter()
+                .for_each(|gid| {
+                    gid_map.insert(*gid, *gid);
+                });
+
+            Self::map_gids(pid, &mut gid_map)?;
+
+            debug!("finished setting up uid/gid mapping");
+        } else {
+            unreachable!("it should be impossible to have a user that doesn't have your uid");
+        }
 
         // Set up ^C handling
         let name_clone = self.name.clone();
@@ -94,12 +130,22 @@ impl<'a> Enclosure<'a> {
                 nix::sys::signal::SIGTERM,
             );
             FsDriver::new().cleanup_root(&name_clone);
+            exit(0);
         })?;
+
+        // Restart stopped child
+        ptrace::detach(pid, None)?;
 
         // Wait for exit
         loop {
             match waitpid(pid, None) {
                 Ok(WaitStatus::Exited(_pid, _status)) => {
+                    break;
+                }
+                Ok(WaitStatus::Stopped(_pid, signal::SIGCHLD)) => {
+                    // We might need to wait to let stdout/err buffer
+                    thread::sleep(Duration::from_millis(100));
+                    dbg!("child exited (stop with SIGCHLD)!");
                     break;
                 }
                 Err(nix::errno::Errno::ECHILD) => {
@@ -117,33 +163,79 @@ impl<'a> Enclosure<'a> {
         Ok(())
     }
 
-    fn map_uid<I: Into<i32>, U: Into<u32>>(&self, pid: I, old_uid: U, new_uid: U) -> Result<()> {
-        let newuidmap = Command::new("newuidmap")
-            .arg(pid.into().to_string())
-            .arg(old_uid.into().to_string())
-            .arg(new_uid.into().to_string())
-            .arg("1")
-            .output();
+    fn map_uids<I: Into<i32>>(pid: I, uids: &mut HashMap<Uid, Uid>) -> Result<()> {
+        let pid = pid.into();
+        let mut args = vec![pid.to_string()];
+        for (old_uid, new_uid) in uids.iter() {
+            args.push(old_uid.to_string());
+            args.push(new_uid.to_string());
+            args.push("1".to_string());
+        }
+
+        let newuidmap = Command::new("newuidmap").args(args).output();
+
         if newuidmap.is_err() {
             return newuidmap.map(|_| ()).map_err(|e| e.into());
         }
+
+        let newuidmap = newuidmap?;
+        let stderr = String::from_utf8(newuidmap.stderr)?;
+        if let Some(bad_uid) =
+            Self::check_mapping_regex(r"newuidmap: uid range \[(\d+)-.*", &stderr)?
+        {
+            // Remove bad uid, continue to call newuidmap until it works
+            uids.remove(&Uid::from_raw(bad_uid));
+            return Self::map_uids(pid, uids);
+        }
+
+        debug!("mapped uids {:#?}", uids);
+
         Ok(())
     }
 
-    fn map_gid<I: Into<i32>, U: Into<u32>>(&self, pid: I, old_gid: U, new_gid: U) -> Result<()> {
-        let newgidmap = Command::new("newgidmap")
-            .arg(pid.into().to_string())
-            .arg(old_gid.into().to_string())
-            .arg(new_gid.into().to_string())
-            .arg("1")
-            .output();
+    fn map_gids<I: Into<i32>>(pid: I, gids: &mut HashMap<Gid, Gid>) -> Result<()> {
+        let pid = pid.into();
+        let mut args = vec![pid.to_string()];
+        for (old_gid, new_gid) in gids.iter() {
+            args.push(old_gid.to_string());
+            args.push(new_gid.to_string());
+            args.push("1".to_string());
+        }
+
+        let newgidmap = Command::new("newgidmap").args(args).output();
+
         if newgidmap.is_err() {
             return newgidmap.map(|_| ()).map_err(|e| e.into());
         }
+
+        let newgidmap = newgidmap?;
+        let stderr = String::from_utf8(newgidmap.stderr)?;
+        if let Some(bad_gid) =
+            Self::check_mapping_regex(r"newgidmap: gid range \[(\d+)-.*", &stderr)?
+        {
+            // Remove bad gid, continue to call newgidmap until it works
+            gids.remove(&Gid::from_raw(bad_gid));
+            return Self::map_gids(pid, gids);
+        }
+
+        debug!("mapped gids {:#?}", gids);
+
         Ok(())
     }
 
-    fn run_in_container(&mut self) -> Result<()> {
+    fn check_mapping_regex(regex: &str, stderr: &str) -> Result<Option<u32>> {
+        let regex = Regex::new(regex)?;
+        let bad_id = regex.captures(stderr);
+        if let Some(bad_id) = bad_id {
+            // Remove bad id, continue to call newuidmap until it works
+            let bad_id = bad_id.get(1).unwrap().as_str().parse::<u32>().unwrap();
+            Ok(Some(bad_id))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn run_in_container(&mut self) -> Result<i32> {
         // Mount root RW
         debug!("setup root");
         self.fs.setup_root(&self.name)?;
@@ -203,6 +295,7 @@ impl<'a> Enclosure<'a> {
         let pwd = std::env::current_dir()?;
         chroot(&self.fs.container_root(&self.name))?;
         chdir(&pwd)?;
+
         // Remount rootfs as ro
         if self.immutable_root {
             debug!("remounting rootfs as ro!");
@@ -214,6 +307,10 @@ impl<'a> Enclosure<'a> {
             self.fs.container_root(&self.name).display()
         );
 
+        // Initiate ptrace with the parent process
+        ptrace::traceme()?;
+        signal::kill(getpid(), signal::SIGSTOP)?;
+
         // Do the needful!
         debug!("running command: {:?}", self.command.get_program());
         info!(
@@ -221,9 +318,9 @@ impl<'a> Enclosure<'a> {
             format!("boxed {:?} ♥", self.command.get_program())
                 .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
-        self.command.spawn()?.wait()?;
+        let result = self.command.spawn()?.wait()?;
 
-        Ok(())
+        Ok(result.code().unwrap_or(0))
     }
 
     fn ensure_file(&self, path: &Path) -> Result<()> {

@@ -116,6 +116,7 @@ dependencies = [
  "nix",
  "owo-colors",
  "pretty_env_logger",
+ "regex",
  "rlimit",
  "serde",
  "shellexpand",
