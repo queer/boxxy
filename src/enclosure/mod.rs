@@ -17,7 +17,7 @@ use owo_colors::OwoColorize;
 use rlimit::Resource;
 
 use self::fs::{append_all, FsDriver};
-use self::rule::{Rule, RuleMode, Rules};
+use self::rule::{RuleMode, Rules};
 
 pub mod fs;
 mod linux;
@@ -173,12 +173,12 @@ impl<'a> Enclosure<'a> {
         for rule in &self.rules.rules {
             debug!("processing rule '{}'", rule.name);
 
-            if !self.currently_in_context(rule)? {
+            if !rule.currently_in_context(&self.fs)? {
                 debug!("not applying rule '{}' because of context", rule.name);
                 continue;
             }
 
-            if !self.applies_to_binary(rule)? {
+            if !rule.applies_to_binary(self.command.get_program(), &self.fs)? {
                 debug!("not applying rule '{}' because of binary", rule.name);
                 continue;
             }
@@ -268,53 +268,5 @@ impl<'a> Enclosure<'a> {
         }
 
         Ok(())
-    }
-
-    fn currently_in_context(&self, rule: &Rule) -> Result<bool> {
-        if rule.context.is_empty() {
-            return Ok(true);
-        }
-
-        for context in &rule.context {
-            debug!("{}: resolving context: {}", rule.name, context);
-            let expanded_context = shellexpand::tilde(&context).to_string();
-            let expanded_context = Path::new(&expanded_context).canonicalize()?;
-            let resolved_context = self.fs.maybe_resolve_symlink(&expanded_context)?;
-
-            let pwd = std::env::current_dir()?;
-
-            debug!(
-                "{}: {} <> {}",
-                rule.name,
-                pwd.display(),
-                resolved_context.display()
-            );
-
-            if pwd.starts_with(&resolved_context) {
-                return Ok(true);
-            }
-        }
-
-        Ok(false)
-    }
-
-    fn applies_to_binary(&self, rule: &Rule) -> Result<bool> {
-        if rule.only.is_empty() {
-            return Ok(true);
-        }
-
-        let program = self.command.get_program();
-
-        for binary in &rule.only {
-            debug!("{}: resolving binary: {}", rule.name, binary);
-            let expanded_binary = self.fs.fully_expand_path(binary)?;
-            let resolved_binary = self.fs.maybe_resolve_symlink(&expanded_binary)?;
-
-            if program == resolved_binary.file_name().unwrap() {
-                return Ok(true);
-            }
-        }
-
-        Ok(false)
     }
 }
