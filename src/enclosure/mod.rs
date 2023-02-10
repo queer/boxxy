@@ -11,7 +11,7 @@ use log::*;
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::sys::{ptrace, signal};
-use nix::unistd::{chdir, chroot, getgrouplist, getpid, Gid, Uid, User};
+use nix::unistd::{chdir, chroot, getgrouplist, getpid, Gid, User};
 use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
@@ -69,7 +69,7 @@ impl<'a> Enclosure<'a> {
         let pid = clone(
             Box::new(callback),
             stack,
-            CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWUSER | CloneFlags::CLONE_NEWPID,
+            CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWUSER,
             Some(nix::sys::signal::Signal::SIGCHLD as i32),
         )?;
         if pid.as_raw() == -1 {
@@ -99,7 +99,6 @@ impl<'a> Enclosure<'a> {
         if let Some(user) = User::from_uid(uid)? {
             let mut uid_map = HashMap::new();
             uid_map.insert(user.uid, user.uid);
-            uid_map.insert(Uid::from_raw(0), Uid::from_raw(0));
 
             linux::map_uids(pid, &mut uid_map)?;
 
@@ -195,8 +194,7 @@ impl<'a> Enclosure<'a> {
                         append_all(&container_root, vec![&expanded_target])
                     }
                 };
-            let target_path = target_path.as_path();
-            let target_path = self.fs.maybe_resolve_symlink(target_path)?;
+            let target_path = self.fs.maybe_resolve_symlink(&target_path)?;
 
             let rewrite_path = self.fs.fully_expand_path(&rule.rewrite)?;
 
