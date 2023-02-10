@@ -8,7 +8,7 @@ use haikunator::Haikunator;
 use log::*;
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitStatus};
-use nix::unistd::{chdir, chroot};
+use nix::unistd::{chdir, chroot, Gid, Uid};
 use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
@@ -70,30 +70,19 @@ impl<'a> Enclosure<'a> {
             return Err(std::io::Error::last_os_error().into());
         }
 
+        // Map current UID + GID into the container so that things continue to
+        // work as expected.
+
         // Get current UID + GID
         let uid = nix::unistd::getuid();
         let gid = nix::unistd::getgid();
 
         // Call newuidmap + newgidmap
-        let newuidmap = Command::new("newuidmap")
-            .arg(pid.as_raw().to_string())
-            .arg(uid.to_string())
-            .arg(uid.to_string())
-            .arg("1")
-            .output();
-        if newuidmap.is_err() {
-            return newuidmap.map(|_| ()).map_err(|e| e.into());
-        }
+        self.map_uid(pid, uid, uid)?;
+        self.map_gid(pid, gid, gid)?;
 
-        let newgidmap = Command::new("newgidmap")
-            .arg(pid.as_raw().to_string())
-            .arg(gid.to_string())
-            .arg(gid.to_string())
-            .arg("1")
-            .output();
-        if newgidmap.is_err() {
-            return newgidmap.map(|_| ()).map_err(|e| e.into());
-        }
+        self.map_uid(pid, Uid::from_raw(0), uid)?;
+        self.map_gid(pid, Gid::from_raw(0), gid)?;
 
         // Set up ^C handling
         let name_clone = self.name.clone();
@@ -125,6 +114,32 @@ impl<'a> Enclosure<'a> {
         // Clean up!
         self.fs.cleanup_root(&self.name)?;
 
+        Ok(())
+    }
+
+    fn map_uid<I: Into<i32>, U: Into<u32>>(&self, pid: I, old_uid: U, new_uid: U) -> Result<()> {
+        let newuidmap = Command::new("newuidmap")
+            .arg(pid.into().to_string())
+            .arg(old_uid.into().to_string())
+            .arg(new_uid.into().to_string())
+            .arg("1")
+            .output();
+        if newuidmap.is_err() {
+            return newuidmap.map(|_| ()).map_err(|e| e.into());
+        }
+        Ok(())
+    }
+
+    fn map_gid<I: Into<i32>, U: Into<u32>>(&self, pid: I, old_gid: U, new_gid: U) -> Result<()> {
+        let newgidmap = Command::new("newgidmap")
+            .arg(pid.into().to_string())
+            .arg(old_gid.into().to_string())
+            .arg(new_gid.into().to_string())
+            .arg("1")
+            .output();
+        if newgidmap.is_err() {
+            return newgidmap.map(|_| ()).map_err(|e| e.into());
+        }
         Ok(())
     }
 
