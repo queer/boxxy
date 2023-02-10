@@ -54,7 +54,7 @@ fn main() -> Result<()> {
 
     // Load rules
     let rules = load_rules(&self_exe)?;
-    info!("loaded {} rules", rules.rules.len());
+    info!("loaded {} rule(s)", rules.rules.len());
 
     // Do the do!
     let (cmd, args) = (&cfg.command_with_args[0], &cfg.command_with_args[1..]);

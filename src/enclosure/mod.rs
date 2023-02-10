@@ -274,8 +274,12 @@ impl<'a> Enclosure<'a> {
 
     fn clean_up_container(&mut self) -> Result<()> {
         info!(
-            "cleaning up {} paths ♥",
-            self.created_directories.len() + self.created_files.len()
+            "{}",
+            format!(
+                "cleaning up {} paths ♥",
+                self.created_directories.len() + self.created_files.len()
+            )
+            .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
         for file in &self.created_files {
             info!("removing temporary file {}", file.display());
