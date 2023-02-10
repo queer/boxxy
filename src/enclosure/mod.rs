@@ -29,7 +29,6 @@ pub struct Enclosure<'a> {
     name: String,
     rules: Rules,
     immutable_root: bool,
-    #[allow(unused)]
     child_exit_status: i32,
 }
 
@@ -53,7 +52,7 @@ impl<'a> Enclosure<'a> {
 
     pub fn run(&mut self) -> Result<()> {
         // Set up the container: callback, stack, etc.
-        let callback = || self.run_in_container().map(|_| 0).unwrap();
+        let callback = || self.run_in_container().unwrap();
 
         let stack_size = match Resource::STACK.get() {
             Ok((soft, _hard)) => soft as usize,
@@ -130,22 +129,18 @@ impl<'a> Enclosure<'a> {
                 nix::sys::signal::SIGTERM,
             );
             FsDriver::new().cleanup_root(&name_clone);
-            exit(0);
+            exit(1);
         })?;
 
         // Restart stopped child
         ptrace::detach(pid, None)?;
 
         // Wait for exit
+        let mut exit_status: i32 = -1;
         loop {
             match waitpid(pid, None) {
-                Ok(WaitStatus::Exited(_pid, _status)) => {
-                    break;
-                }
-                Ok(WaitStatus::Stopped(_pid, signal::SIGCHLD)) => {
-                    // We might need to wait to let stdout/err buffer
-                    thread::sleep(Duration::from_millis(100));
-                    dbg!("child exited (stop with SIGCHLD)!");
+                Ok(WaitStatus::Exited(_pid, status)) => {
+                    exit_status = status;
                     break;
                 }
                 Err(nix::errno::Errno::ECHILD) => {
@@ -156,11 +151,14 @@ impl<'a> Enclosure<'a> {
                 _ => thread::sleep(Duration::from_millis(100)),
             }
         }
+        self.child_exit_status = exit_status;
 
         // Clean up!
         self.fs.cleanup_root(&self.name)?;
 
-        Ok(())
+        // All done! Return the child's exit status
+        debug!("exiting with status {}", self.child_exit_status);
+        exit(self.child_exit_status);
     }
 
     fn map_uids<I: Into<i32>>(pid: I, uids: &mut HashMap<Uid, Uid>) -> Result<()> {
@@ -235,7 +233,7 @@ impl<'a> Enclosure<'a> {
         }
     }
 
-    fn run_in_container(&mut self) -> Result<i32> {
+    fn run_in_container(&mut self) -> Result<isize> {
         // Mount root RW
         debug!("setup root");
         self.fs.setup_root(&self.name)?;
@@ -320,7 +318,7 @@ impl<'a> Enclosure<'a> {
         );
         let result = self.command.spawn()?.wait()?;
 
-        Ok(result.code().unwrap_or(0))
+        Ok(result.code().map(|c| c as isize).unwrap_or(0isize))
     }
 
     fn ensure_file(&self, path: &Path) -> Result<()> {
