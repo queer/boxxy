@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::ffi::CString;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{exit, Command};
 use std::thread;
 use std::time::Duration;
@@ -30,6 +30,8 @@ pub struct Enclosure<'a> {
     rules: Rules,
     immutable_root: bool,
     child_exit_status: i32,
+    created_files: Vec<PathBuf>,
+    created_directories: Vec<PathBuf>,
 }
 
 pub struct Opts<'a> {
@@ -47,10 +49,15 @@ impl<'a> Enclosure<'a> {
             rules: opts.rules,
             immutable_root: opts.immutable_root,
             child_exit_status: -1,
+            created_files: vec![],
+            created_directories: vec![],
         }
     }
 
     pub fn run(&mut self) -> Result<()> {
+        // Prepare the filesystem
+        self.set_up_temporary_files()?;
+
         // Set up the container: callback, stack, etc.
         let callback = || self.run_in_container().unwrap();
 
@@ -154,13 +161,64 @@ impl<'a> Enclosure<'a> {
 
         // Clean up!
         self.fs.cleanup_root(&self.name)?;
+        self.clean_up_container()?;
 
         // All done! Return the child's exit status
         debug!("exiting with status {}", self.child_exit_status);
         exit(self.child_exit_status);
     }
 
-    fn run_in_container(&mut self) -> Result<isize> {
+    fn set_up_temporary_files(&mut self) -> Result<Vec<PathBuf>> {
+        for rule in &self.rules.rules {
+            debug!("processing path creation for rule '{}'", rule.name);
+
+            if !rule.currently_in_context(&self.fs)? {
+                debug!(
+                    "not processing paths for rule '{}' because of context",
+                    rule.name
+                );
+                continue;
+            }
+
+            if !rule.applies_to_binary(self.command.get_program(), &self.fs)? {
+                debug!(
+                    "not processing paths for rule '{}' because of binary",
+                    rule.name
+                );
+                continue;
+            }
+
+            let expanded_target = self.fs.fully_expand_path(&rule.target)?;
+            let target_path = self.fs.maybe_resolve_symlink(&expanded_target)?;
+
+            let rewrite_path = self.fs.fully_expand_path(&rule.rewrite)?;
+
+            debug!("ensuring path: {target_path:?}");
+            debug!("rewriting to: {rewrite_path:?}");
+
+            match rule.mode {
+                RuleMode::File => {
+                    self.ensure_file(&rewrite_path)?;
+                    if self.ensure_file(&target_path)? {
+                        self.created_files.push(target_path.clone());
+                    }
+                }
+                RuleMode::Directory => {
+                    self.ensure_directory(&rewrite_path)?;
+                    if self.ensure_directory(&target_path)? {
+                        self.created_directories.push(target_path.clone());
+                    }
+                }
+            }
+
+            info!("redirect: {} -> {}", rule.target, rule.rewrite);
+            debug!("rewrote base bath {rewrite_path:?} => {target_path:?}");
+        }
+
+        Ok(vec![])
+    }
+
+    fn set_up_container(&mut self) -> Result<()> {
         // Mount root RW
         debug!("setup root");
         self.fs.setup_root(&self.name)?;
@@ -200,13 +258,9 @@ impl<'a> Enclosure<'a> {
 
             match rule.mode {
                 RuleMode::File => {
-                    self.ensure_file(&rewrite_path)?;
-                    self.ensure_file(&target_path)?;
                     self.fs.bind_mount_rw(&rewrite_path, &target_path)?;
                 }
                 RuleMode::Directory => {
-                    self.ensure_directory(&rewrite_path)?;
-                    self.ensure_directory(&target_path)?;
                     self.fs.bind_mount_rw(&rewrite_path, &target_path)?;
                 }
             }
@@ -214,6 +268,29 @@ impl<'a> Enclosure<'a> {
             info!("redirect: {} -> {}", rule.target, rule.rewrite);
             debug!("rewrote base bath {rewrite_path:?} => {target_path:?}");
         }
+
+        Ok(())
+    }
+
+    fn clean_up_container(&mut self) -> Result<()> {
+        info!(
+            "cleaning up {} paths ♥",
+            self.created_directories.len() + self.created_files.len()
+        );
+        for file in &self.created_files {
+            info!("removing temporary file {}", file.display());
+            std::fs::remove_file(file)?;
+        }
+        for dir in &self.created_directories {
+            info!("removing temporary directory {}", dir.display());
+            std::fs::remove_dir(dir)?;
+        }
+
+        Ok(())
+    }
+
+    fn run_in_container(&mut self) -> Result<isize> {
+        self.set_up_container()?;
 
         // Chroot into container root
         let pwd = std::env::current_dir()?;
@@ -244,10 +321,12 @@ impl<'a> Enclosure<'a> {
         );
         let result = self.command.spawn()?.wait()?;
 
+        debug!("command exited with status: {:?}", result);
+
         Ok(result.code().map(|c| c as isize).unwrap_or(0isize))
     }
 
-    fn ensure_file(&self, path: &Path) -> Result<()> {
+    fn ensure_file(&self, path: &Path) -> Result<bool> {
         if !path.exists() {
             if let Some(parent) = path.parent() {
                 if !parent.exists() {
@@ -255,16 +334,18 @@ impl<'a> Enclosure<'a> {
                 }
             }
             self.fs.touch(path)?;
+            Ok(true)
+        } else {
+            Ok(false)
         }
-
-        Ok(())
     }
 
-    fn ensure_directory(&self, path: &Path) -> Result<()> {
+    fn ensure_directory(&self, path: &Path) -> Result<bool> {
         if !path.exists() {
             self.fs.touch_dir(path)?;
+            Ok(true)
+        } else {
+            Ok(false)
         }
-
-        Ok(())
     }
 }
