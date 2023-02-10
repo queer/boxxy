@@ -265,7 +265,7 @@ impl<'a> Enclosure<'a> {
                 }
             }
 
-            info!("redirect: {} -> {}", rule.target, rule.rewrite);
+            info!("* {} -> {}", rule.target, rule.rewrite);
             debug!("rewrote base bath {rewrite_path:?} => {target_path:?}");
         }
 
@@ -273,20 +273,20 @@ impl<'a> Enclosure<'a> {
     }
 
     fn clean_up_container(&mut self) -> Result<()> {
-        info!(
+        debug!(
             "{}",
             format!(
-                "cleaning up {} paths ♥",
+                "cleaning up {} path(s) ♥",
                 self.created_directories.len() + self.created_files.len()
             )
             .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
         for file in &self.created_files {
-            info!("removing temporary file {}", file.display());
+            debug!("removing temporary file {}", file.display());
             std::fs::remove_file(file)?;
         }
         for dir in &self.created_directories {
-            info!("removing temporary directory {}", dir.display());
+            debug!("removing temporary directory {}", dir.display());
             std::fs::remove_dir(dir)?;
         }
 

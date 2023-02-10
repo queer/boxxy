@@ -92,7 +92,7 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
         std::env::set_var("RUST_LOG", &cfg.log_level);
     }
 
-    if atty::isnt(Stream::Stdin) && !cfg.force_colour {
+    if atty::isnt(Stream::Stdout) && !cfg.force_colour {
         // Disable user-friendliness if we're not outputting to a terminal.
         std::env::set_var("NO_COLOR", "1");
         std::env::set_var("RUST_LOG", "warn");
@@ -104,6 +104,7 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
         .issue_url(concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"))
         .add_issue_metadata("version", env!("CARGO_PKG_VERSION"))
         .install()?;
+
     pretty_env_logger::init();
 
     Ok(())
