@@ -9,7 +9,7 @@ use super::fs::FsDriver;
 
 /// Container for deserialisation
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Rules {
+pub struct BoxxyConfig {
     pub rules: Vec<Rule>,
 }
 

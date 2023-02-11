@@ -7,7 +7,7 @@ use color_eyre::Result;
 use config::{Config, FileFormat};
 use log::*;
 
-use crate::enclosure::rule::Rules;
+use crate::enclosure::rule::BoxxyConfig;
 
 pub mod enclosure;
 
@@ -44,6 +44,13 @@ pub struct Args {
         help = "Force colour output even when stdout is not a tty."
     )]
     pub force_colour: bool,
+    #[arg(
+        short = 't',
+        long = "trace",
+        default_value = "false",
+        help = "Enable tracing of I/O-related syscalls and generate a report of files/directories the program touched."
+    )]
+    pub trace: bool,
 }
 
 fn main() -> Result<()> {
@@ -73,6 +80,7 @@ fn main() -> Result<()> {
         rules,
         command: &mut command,
         immutable_root: cfg.immutable_root,
+        trace: cfg.trace,
     })
     .run()?;
 
@@ -110,7 +118,7 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
     Ok(())
 }
 
-fn load_rules(self_exe: &str) -> Result<Rules> {
+fn load_rules(self_exe: &str) -> Result<BoxxyConfig> {
     // Set up config file
     let config_file = if self_exe.starts_with("target/debug") {
         "boxxy-dev.yaml"
@@ -135,7 +143,7 @@ fn load_rules(self_exe: &str) -> Result<Rules> {
                 FileFormat::Yaml,
             ))
             .build()?;
-        config.try_deserialize::<Rules>()?
+        config.try_deserialize::<BoxxyConfig>()?
     } else {
         warn!("you have no rules in your config file.");
         warn!("try adding some rules to {config_path:?}");
@@ -149,7 +157,7 @@ example rule:
       rewrite: "~/.config/aws"
         "#
         );
-        Rules { rules: vec![] }
+        BoxxyConfig { rules: vec![] }
     };
 
     Ok(rules)

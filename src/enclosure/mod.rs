@@ -11,33 +11,36 @@ use log::*;
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::sys::{ptrace, signal};
-use nix::unistd::{chdir, chroot, getgrouplist, getpid, Gid, User};
+use nix::unistd::{chdir, chroot, getgrouplist, getpid, Gid, Pid, User};
 use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
 
 use self::fs::{append_all, FsDriver};
-use self::rule::{RuleMode, Rules};
+use self::rule::{BoxxyConfig, RuleMode};
 
 pub mod fs;
 mod linux;
 pub mod rule;
+mod tracer;
 
 pub struct Enclosure<'a> {
     command: &'a mut Command,
     fs: FsDriver,
     name: String,
-    rules: Rules,
+    boxxy_config: BoxxyConfig,
     immutable_root: bool,
     child_exit_status: i32,
     created_files: Vec<PathBuf>,
     created_directories: Vec<PathBuf>,
+    trace: bool,
 }
 
 pub struct Opts<'a> {
-    pub rules: Rules,
+    pub rules: BoxxyConfig,
     pub command: &'a mut Command,
     pub immutable_root: bool,
+    pub trace: bool,
 }
 
 impl<'a> Enclosure<'a> {
@@ -46,11 +49,12 @@ impl<'a> Enclosure<'a> {
             command: opts.command,
             fs: FsDriver::new(),
             name: Haikunator::default().haikunate(),
-            rules: opts.rules,
+            boxxy_config: opts.rules,
             immutable_root: opts.immutable_root,
             child_exit_status: -1,
             created_files: vec![],
             created_directories: vec![],
+            trace: opts.trace,
         }
     }
 
@@ -138,9 +142,37 @@ impl<'a> Enclosure<'a> {
             exit(1);
         })?;
 
-        // Restart stopped child
-        ptrace::detach(pid, None)?;
+        // Restart stopped child if not tracing
+        if self.trace {
+            self.run_with_tracing(pid)?;
+        } else {
+            ptrace::detach(pid, None)?;
+            self.run_without_tracing(pid)?;
+        }
 
+        Ok(())
+    }
+
+    #[allow(unreachable_code)]
+    fn run_with_tracing(&mut self, pid: Pid) -> Result<()> {
+        ptrace::setoptions(
+            pid,
+            ptrace::Options::PTRACE_O_EXITKILL
+                | ptrace::Options::PTRACE_O_TRACESYSGOOD
+                | ptrace::Options::PTRACE_O_TRACEFORK
+                | ptrace::Options::PTRACE_O_TRACEEXEC
+                | ptrace::Options::PTRACE_O_TRACECLONE
+                | ptrace::Options::PTRACE_O_TRACEEXIT
+                | ptrace::Options::PTRACE_O_TRACEVFORK,
+        )?;
+        debug!("applied ptrace flags!");
+
+        todo!();
+
+        exit(self.child_exit_status);
+    }
+
+    fn run_without_tracing(&mut self, pid: Pid) -> Result<()> {
         // Wait for exit
         let mut exit_status: i32 = -1;
         loop {
@@ -169,7 +201,7 @@ impl<'a> Enclosure<'a> {
     }
 
     fn set_up_temporary_files(&mut self) -> Result<Vec<PathBuf>> {
-        for rule in &self.rules.rules {
+        for rule in &self.boxxy_config.rules {
             debug!("processing path creation for rule '{}'", rule.name);
 
             if !rule.currently_in_context(&self.fs)? {
@@ -227,7 +259,7 @@ impl<'a> Enclosure<'a> {
         self.fs.bind_mount_rw(Path::new("/"), &container_root)?;
 
         // Apply all rules via bind mounts
-        for rule in &self.rules.rules {
+        for rule in &self.boxxy_config.rules {
             debug!("processing rule '{}'", rule.name);
 
             if !rule.currently_in_context(&self.fs)? {
