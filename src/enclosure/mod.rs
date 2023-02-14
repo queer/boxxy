@@ -15,7 +15,7 @@ use nix::mount::{umount2, MntFlags};
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::sys::{ptrace, signal};
-use nix::unistd::{chdir, getgrouplist, getpid, pivot_root, Gid, Pid, User};
+use nix::unistd::{chdir, chroot, getgrouplist, getpid, pivot_root, Gid, Pid, User};
 use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
@@ -360,10 +360,16 @@ impl<'a> Enclosure<'a> {
         self.set_up_container()?;
 
         let pwd = std::env::current_dir()?;
-        chdir(&self.fs.container_root(&self.name))?;
-        pivot_root(".", ".")?;
-        umount2(".", MntFlags::MNT_DETACH)?;
-        chdir(&pwd)?;
+
+        if self.trace {
+            chroot(&self.fs.container_root(&self.name))?;
+            chdir(&pwd)?;
+        } else {
+            chdir(&self.fs.container_root(&self.name))?;
+            pivot_root(".", ".")?;
+            umount2(".", MntFlags::MNT_DETACH)?;
+            chdir(&pwd)?;
+        }
 
         // Remount rootfs as ro
         if self.immutable_root {
