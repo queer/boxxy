@@ -1,6 +1,6 @@
 [package]
 name = "boxxy"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 repository = "https://github.com/queer/boxxy"
 
@@ -8,6 +8,7 @@ repository = "https://github.com/queer/boxxy"
 
 [dependencies]
 atty = "0.2.14"
+bat = { version = "0.22.1", default-features = false, features = ["atty", "regex-onig"] }
 byteorder = "1.4.3"
 clap = { version = "4.1.4", features = ["derive"] }
 color-eyre = { version = "0.6.2", features = ["issue-url"] }

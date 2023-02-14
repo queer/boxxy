@@ -1,8 +1,9 @@
 use std::fs;
+use std::path::PathBuf;
 use std::process::Command;
 
 use atty::Stream;
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use color_eyre::Result;
 use config::{Config, FileFormat};
 use log::*;
@@ -51,6 +52,19 @@ pub struct Args {
         help = "Enable tracing of I/O-related syscalls and generate a report of files/directories the program touched."
     )]
     pub trace: bool,
+
+    #[command(subcommand)]
+    pub command: Option<BoxxySubcommand>,
+}
+
+#[derive(Subcommand)]
+#[command(
+    name = "config",
+    about = "View the config file.",
+    subcommand_negates_reqs = true
+)]
+pub enum BoxxySubcommand {
+    Config,
 }
 
 fn main() -> Result<()> {
@@ -58,6 +72,14 @@ fn main() -> Result<()> {
     let cfg = Args::parse();
     let self_exe = std::env::args().next().unwrap();
     setup_logging(&cfg, &self_exe)?;
+
+    if let Some(BoxxySubcommand::Config) = cfg.command {
+        let config_path = config_file_path(&self_exe)?;
+        let mut printer = bat::PrettyPrinter::new();
+        printer.input_file(config_path).print()?;
+
+        return Ok(());
+    }
 
     // Load rules
     let rules = load_rules(&self_exe)?;
@@ -118,16 +140,18 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
     Ok(())
 }
 
-fn load_rules(self_exe: &str) -> Result<BoxxyConfig> {
-    // Set up config file
+fn config_file_path(self_exe: &str) -> Result<PathBuf> {
     let config_file = if self_exe.starts_with("target/debug") {
         "boxxy-dev.yaml"
     } else {
         "boxxy.yaml"
     };
+
     debug!("loading config: {}", config_file);
+
     let config_path =
         enclosure::fs::append_all(&dirs::config_dir().unwrap(), vec!["boxxy", config_file]);
+
     fs::create_dir_all(config_path.parent().unwrap())?;
     if !config_path.exists() {
         info!("no config file found!");
@@ -135,7 +159,11 @@ fn load_rules(self_exe: &str) -> Result<BoxxyConfig> {
         info!("created empty config at {}", config_path.display());
     }
 
-    // Load rules from config
+    Ok(config_path)
+}
+
+fn load_rules(self_exe: &str) -> Result<BoxxyConfig> {
+    let config_path = config_file_path(self_exe)?;
     let rules = if fs::metadata(&config_path)?.len() > 0 {
         let config = Config::builder()
             .add_source(config::File::new(

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 cargo build --release
-cp target/release/boxxy ~/bin
+cp -v target/release/boxxy ~/bin
