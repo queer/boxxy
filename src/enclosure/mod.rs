@@ -274,7 +274,6 @@ impl<'a> Enclosure<'a> {
                 }
             }
 
-            info!("redirect: {} -> {}", rule.target, rule.rewrite);
             debug!("rewrote base bath {rewrite_path:?} => {target_path:?}");
         }
 
