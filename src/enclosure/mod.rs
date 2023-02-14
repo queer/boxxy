@@ -11,10 +11,11 @@ use std::time::Duration;
 use color_eyre::Result;
 use haikunator::Haikunator;
 use log::*;
+use nix::mount::{umount2, MntFlags};
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::sys::{ptrace, signal};
-use nix::unistd::{chdir, chroot, getgrouplist, getpid, Gid, Pid, User};
+use nix::unistd::{chdir, getgrouplist, getpid, pivot_root, Gid, Pid, User};
 use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
@@ -358,9 +359,10 @@ impl<'a> Enclosure<'a> {
     fn run_in_container(&mut self) -> Result<isize> {
         self.set_up_container()?;
 
-        // Chroot into container root
         let pwd = std::env::current_dir()?;
-        chroot(&self.fs.container_root(&self.name))?;
+        chdir(&self.fs.container_root(&self.name))?;
+        pivot_root(".", ".")?;
+        umount2(".", MntFlags::MNT_DETACH)?;
         chdir(&pwd)?;
 
         // Remount rootfs as ro
