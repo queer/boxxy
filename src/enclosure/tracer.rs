@@ -23,6 +23,22 @@ impl Tracer {
         Self { children }
     }
 
+    pub fn flag(pid: Pid) -> Result<()> {
+        debug!("applying ptrace flags to {pid}...");
+        ptrace::setoptions(
+            pid,
+            ptrace::Options::PTRACE_O_EXITKILL
+                | ptrace::Options::PTRACE_O_TRACESYSGOOD
+                | ptrace::Options::PTRACE_O_TRACEFORK
+                | ptrace::Options::PTRACE_O_TRACEEXEC
+                | ptrace::Options::PTRACE_O_TRACECLONE
+                | ptrace::Options::PTRACE_O_TRACEEXIT
+                | ptrace::Options::PTRACE_O_TRACEVFORK,
+        )?;
+
+        Ok(())
+    }
+
     pub fn run(&mut self) -> Result<()> {
         debug!("starting to run!");
         while !self.children.is_empty() {
@@ -80,19 +96,19 @@ impl Tracer {
                 child.last_signal = None;
                 match &child.state {
                     ChildProcessState::Running => {
-                        debug!("process {pid} entered syscall");
+                        trace!("process {pid} entered syscall");
                         child.state = ChildProcessState::EnteringSyscall;
                         self.handle_syscall_enter(pid)?;
                         ptrace::syscall(pid, None)?;
                     }
                     ChildProcessState::EnteringSyscall => {
-                        debug!("process {pid} exited syscall");
+                        trace!("process {pid} exited syscall");
                         child.state = ChildProcessState::ExitingSyscall;
                         self.handle_syscall_exit(pid)?;
                         ptrace::syscall(pid, None)?;
                     }
                     ChildProcessState::ExitingSyscall => {
-                        debug!("process {pid} returned to running");
+                        trace!("process {pid} returned to running");
                         child.state = ChildProcessState::Running;
                         ptrace::syscall(pid, None)?;
                     }
@@ -108,6 +124,7 @@ impl Tracer {
                         ChildProcessState::Created => {
                             debug!("transition created => running");
                             child.state = ChildProcessState::Running;
+                            Self::flag(child.pid)?;
                             ptrace::syscall(pid, None)?;
                         }
                         ChildProcessState::Running => {
@@ -237,6 +254,10 @@ impl ChildProcess {
             parent,
             register_cache: RefCell::new(HashMap::new()),
         }
+    }
+
+    pub fn pid(&self) -> Pid {
+        self.pid
     }
 
     pub fn get_registers(&self) -> Result<PtraceRegisters> {

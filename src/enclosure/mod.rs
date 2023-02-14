@@ -158,17 +158,7 @@ impl<'a> Enclosure<'a> {
 
     #[allow(unreachable_code)]
     fn run_with_tracing(&mut self, pid: Pid) -> Result<()> {
-        ptrace::setoptions(
-            pid,
-            ptrace::Options::PTRACE_O_EXITKILL
-                | ptrace::Options::PTRACE_O_TRACESYSGOOD
-                | ptrace::Options::PTRACE_O_TRACEFORK
-                | ptrace::Options::PTRACE_O_TRACEEXEC
-                | ptrace::Options::PTRACE_O_TRACECLONE
-                | ptrace::Options::PTRACE_O_TRACEEXIT
-                | ptrace::Options::PTRACE_O_TRACEVFORK,
-        )?;
-        debug!("applied ptrace flags!");
+        Tracer::flag(pid)?;
 
         debug!("restarting child and starting tracer!");
         ptrace::syscall(pid, None)?;
