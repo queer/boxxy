@@ -3,7 +3,6 @@ use std::fs;
 use std::path::PathBuf;
 
 use color_eyre::Result;
-use log::*;
 use nix::unistd::Pid;
 
 use super::tracer::{ChildProcess, PtraceRegisters, StringRegister, Tracer};
@@ -180,6 +179,7 @@ lazy_static::lazy_static! {
 pub struct Syscall {
     pub name: String,
     pub number: u64,
+    pub path: Option<PathBuf>,
 }
 
 pub fn handle_syscall(tracer: &Tracer, pid: Pid) -> Result<Option<Syscall>> {
@@ -192,16 +192,12 @@ pub fn handle_syscall(tracer: &Tracer, pid: Pid) -> Result<Option<Syscall>> {
     let registers = child.get_registers()?;
     let syscall_no = registers.orig_rax;
     if let Some(syscall_name) = syscall_numbers::native::sys_call_name(syscall_no.try_into()?) {
+        let path = get_path_from_syscall(child, syscall_no, &mut registers.clone())?;
         let syscall = Syscall {
             name: syscall_name.to_string(),
             number: syscall_no,
+            path,
         };
-
-        if let Some(path) = get_path_from_syscall(child, syscall_no, &mut registers.clone())? {
-            info!("{}({})", syscall.name, path.display());
-        } else {
-            trace!("{} has unknown path!?", syscall.name);
-        }
 
         Ok(Some(syscall))
     } else {

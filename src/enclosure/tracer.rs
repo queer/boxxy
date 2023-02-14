@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::mpsc::Sender;
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use color_eyre::Result;
@@ -8,6 +9,8 @@ use nix::sys::ptrace;
 use nix::sys::signal::Signal;
 use nix::sys::wait::{waitpid, WaitStatus};
 use nix::unistd::Pid;
+
+use super::syscall::Syscall;
 
 pub struct Tracer {
     children: HashMap<Pid, ChildProcess>,
@@ -39,20 +42,20 @@ impl Tracer {
         Ok(())
     }
 
-    pub fn run(&mut self) -> Result<()> {
+    pub fn run(&mut self, tx: Sender<Syscall>) -> Result<()> {
         debug!("starting to run!");
         while !self.children.is_empty() {
             let mut pids = self.children.keys().cloned().collect::<Vec<_>>();
             pids.sort();
             for pid in pids {
-                self.wait_on_child(pid)?;
+                self.wait_on_child(pid, &tx)?;
             }
         }
 
         Ok(())
     }
 
-    fn wait_on_child(&mut self, pid: Pid) -> Result<()> {
+    fn wait_on_child(&mut self, pid: Pid, tx: &Sender<Syscall>) -> Result<()> {
         let status = waitpid(pid, Some(nix::sys::wait::WaitPidFlag::WNOHANG))?;
         match status {
             WaitStatus::Exited(pid, status) => {
@@ -98,7 +101,7 @@ impl Tracer {
                     ChildProcessState::Running => {
                         trace!("process {pid} entered syscall");
                         child.state = ChildProcessState::EnteringSyscall;
-                        self.handle_syscall_enter(pid)?;
+                        self.handle_syscall_enter(pid, tx)?;
                         ptrace::syscall(pid, None)?;
                     }
                     ChildProcessState::EnteringSyscall => {
@@ -213,15 +216,17 @@ impl Tracer {
         Ok(())
     }
 
-    fn handle_syscall_enter(&mut self, pid: Pid) -> Result<()> {
-        super::syscall::handle_syscall(self, pid)?;
+    fn handle_syscall_enter(&mut self, pid: Pid, tx: &Sender<Syscall>) -> Result<()> {
+        if let Some(syscall) = super::syscall::handle_syscall(self, pid)? {
+            tx.send(syscall)?;
+        }
         Ok(())
     }
 
     fn handle_syscall_exit(&self, pid: Pid) -> Result<()> {
         let child = self.children.get(&pid).unwrap();
         let regs = child.get_registers()?;
-        debug!(
+        trace!(
             "child {pid} exited syscall {:?}",
             syscall_numbers::native::sys_call_name(regs.orig_rax as i64)
         );

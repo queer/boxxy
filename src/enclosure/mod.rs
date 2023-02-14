@@ -1,7 +1,10 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ffi::CString;
+use std::fs::File;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{exit, Command};
+use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
@@ -159,10 +162,11 @@ impl<'a> Enclosure<'a> {
     #[allow(unreachable_code)]
     fn run_with_tracing(&mut self, pid: Pid) -> Result<()> {
         Tracer::flag(pid)?;
+        let (tx, rx) = channel();
 
         debug!("restarting child and starting tracer!");
         ptrace::syscall(pid, None)?;
-        Tracer::new(pid).run()?;
+        Tracer::new(pid).run(tx)?;
         debug!("tracing finished!");
 
         match waitpid(pid, None)? {
@@ -171,6 +175,29 @@ impl<'a> Enclosure<'a> {
             }
             _ => unreachable!("child should have exited!"),
         }
+
+        let mut buffer = String::new();
+        let mut seen_paths = HashSet::new();
+        let mut counter = 0;
+        {
+            use std::fmt::Write;
+            while let Ok(syscall) = rx.recv() {
+                if let Some(path) = syscall.path {
+                    let container_root = self.fs.container_root(&self.name);
+
+                    if path.starts_with(&container_root) && !seen_paths.contains(&path) {
+                        writeln!(buffer, "/{}", path.strip_prefix(&container_root)?.display())?;
+                        seen_paths.insert(path);
+                        counter += 1;
+                    }
+                }
+            }
+            writeln!(buffer, "# total: {counter}")?;
+        }
+
+        let mut file = File::create("./boxxy-report.txt")?;
+        file.write_all(buffer.as_bytes())?;
+        info!("wrote trace report to boxxy-report.txt");
 
         exit(self.child_exit_status);
     }
