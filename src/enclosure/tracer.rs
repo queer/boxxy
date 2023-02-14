@@ -1,5 +1,7 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 
+use byteorder::{LittleEndian, WriteBytesExt};
 use color_eyre::Result;
 use log::*;
 use nix::sys::ptrace;
@@ -13,12 +15,16 @@ pub struct Tracer {
 
 impl Tracer {
     pub fn new(pid: Pid) -> Self {
+        debug!("starting new tracer for root pid {pid}");
         let mut children = HashMap::new();
-        children.insert(pid, ChildProcess::new(pid, None));
+        let mut root_child = ChildProcess::new(pid, None);
+        root_child.state = ChildProcessState::Running;
+        children.insert(pid, root_child);
         Self { children }
     }
 
     pub fn run(&mut self) -> Result<()> {
+        debug!("starting to run!");
         while !self.children.is_empty() {
             let mut pids = self.children.keys().cloned().collect::<Vec<_>>();
             pids.sort();
@@ -154,6 +160,10 @@ impl Tracer {
             _ => {}
         }
 
+        if let Some(child) = self.children.get_mut(&pid) {
+            child.clear_register_cache();
+        }
+
         Ok(())
     }
 
@@ -186,13 +196,8 @@ impl Tracer {
         Ok(())
     }
 
-    fn handle_syscall_enter(&self, pid: Pid) -> Result<()> {
-        let child = self.children.get(&pid).unwrap();
-        let regs = child.get_registers()?;
-        debug!(
-            "child {pid} entered syscall {:?}",
-            syscall_numbers::native::sys_call_name(regs.orig_rax as i64)
-        );
+    fn handle_syscall_enter(&mut self, pid: Pid) -> Result<()> {
+        super::syscall::handle_syscall(self, pid)?;
         Ok(())
     }
 
@@ -205,17 +210,22 @@ impl Tracer {
         );
         Ok(())
     }
+
+    pub fn get_child(&self, pid: Pid) -> Option<&ChildProcess> {
+        self.children.get(&pid)
+    }
 }
 
-type PtraceRegisters = libc::user_regs_struct;
+pub type PtraceRegisters = libc::user_regs_struct;
 
 #[derive(Debug, Clone)]
-struct ChildProcess {
+pub struct ChildProcess {
     #[allow(unused)]
     pid: Pid,
     state: ChildProcessState,
     last_signal: Option<Signal>,
     parent: Option<Pid>,
+    register_cache: RefCell<HashMap<StringRegister, String>>,
 }
 
 impl ChildProcess {
@@ -225,19 +235,78 @@ impl ChildProcess {
             state: ChildProcessState::Created,
             last_signal: None,
             parent,
+            register_cache: RefCell::new(HashMap::new()),
         }
     }
 
-    fn get_registers(&self) -> Result<PtraceRegisters> {
+    pub fn get_registers(&self) -> Result<PtraceRegisters> {
         ptrace::getregs(self.pid).map_err(|e| e.into())
+    }
+
+    pub fn clear_register_cache(&self) {
+        self.register_cache.borrow_mut().clear();
+    }
+
+    pub fn read_string(&self, register: &StringRegister, addr: *mut u64) -> Result<String> {
+        if let Some(cached_str) = self.register_cache.borrow().get(register) {
+            return Ok(cached_str.clone());
+        }
+
+        let mut buf = vec![];
+        let mut addr = addr;
+        loop {
+            let c = ptrace::read(self.pid, addr as *mut _)?;
+            if c == 0 {
+                break;
+            }
+            buf.write_u64::<LittleEndian>(c as u64)?;
+            if buf.len() >= libc::PATH_MAX as usize {
+                let zero = buf.iter().position(|c| *c == 0);
+                if let Some(idx) = zero {
+                    buf.truncate(idx);
+                }
+                break;
+            }
+
+            let zero = buf.iter().position(|c| *c == 0);
+            if let Some(idx) = zero {
+                buf.truncate(idx);
+                break;
+            }
+
+            // Safety: We're just iterating a C-style string, and exit
+            // condition is checked. Unfortunately, we can't know the length of
+            // the string ahead of time.
+            addr = unsafe { addr.add(1) };
+        }
+
+        match String::from_utf8(buf.clone()) {
+            Ok(s) => {
+                let mut register_cache = self.register_cache.borrow_mut();
+                register_cache.insert(*register, s.clone());
+                Ok(s)
+            }
+            err @ Err(_) => err.map_err(|e| e.into()),
+        }
     }
 }
 
 #[derive(Debug, Clone)]
-enum ChildProcessState {
+pub enum ChildProcessState {
     Created,
     Running,
     EnteringSyscall,
     ExitingSyscall,
     PtraceEvent,
+}
+
+#[allow(unused)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
+pub enum StringRegister {
+    Rdi,
+    Rsi,
+    Rdx,
+    Rcx,
+    R8,
+    R9,
 }

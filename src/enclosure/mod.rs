@@ -24,6 +24,7 @@ use self::rule::{BoxxyConfig, RuleMode};
 pub mod fs;
 mod linux;
 pub mod rule;
+mod syscall;
 mod tracer;
 
 pub struct Enclosure<'a> {
@@ -169,6 +170,7 @@ impl<'a> Enclosure<'a> {
         )?;
         debug!("applied ptrace flags!");
 
+        debug!("restarting child and starting tracer!");
         ptrace::syscall(pid, None)?;
         Tracer::new(pid).run()?;
         debug!("tracing finished!");

@@ -113,6 +113,7 @@ dependencies = [
  "ctrlc",
  "dirs",
  "haikunator",
+ "lazy_static",
  "libc",
  "log",
  "nix",
