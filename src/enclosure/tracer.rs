@@ -14,15 +14,7 @@ pub struct Tracer {
 impl Tracer {
     pub fn new(pid: Pid) -> Self {
         let mut children = HashMap::new();
-        children.insert(
-            pid,
-            ChildProcess {
-                pid,
-                state: ChildProcessState::Running,
-                last_signal: None,
-                parent: None,
-            },
-        );
+        children.insert(pid, ChildProcess::new(pid, None));
         Self { children }
     }
 
@@ -54,15 +46,8 @@ impl Tracer {
                     | libc::PTRACE_EVENT_VFORK => {
                         let child_pid = ptrace::getevent(pid)?;
                         let child_pid = Pid::from_raw(child_pid as i32);
-                        self.children.insert(
-                            child_pid,
-                            ChildProcess {
-                                pid: child_pid,
-                                state: ChildProcessState::Created,
-                                last_signal: None,
-                                parent: Some(pid),
-                            },
-                        );
+                        self.children
+                            .insert(child_pid, ChildProcess::new(child_pid, Some(pid)));
                         debug!("process {pid} spawned {child_pid}");
                         ptrace::syscall(pid, signal)?;
                     }
@@ -234,6 +219,15 @@ struct ChildProcess {
 }
 
 impl ChildProcess {
+    fn new(pid: Pid, parent: Option<Pid>) -> Self {
+        Self {
+            pid,
+            state: ChildProcessState::Created,
+            last_signal: None,
+            parent,
+        }
+    }
+
     fn get_registers(&self) -> Result<PtraceRegisters> {
         ptrace::getregs(self.pid).map_err(|e| e.into())
     }
