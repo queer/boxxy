@@ -16,6 +16,8 @@ use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
 
+use crate::enclosure::tracer::Tracer;
+
 use self::fs::{append_all, FsDriver};
 use self::rule::{BoxxyConfig, RuleMode};
 
@@ -167,7 +169,16 @@ impl<'a> Enclosure<'a> {
         )?;
         debug!("applied ptrace flags!");
 
-        todo!();
+        ptrace::syscall(pid, None)?;
+        Tracer::new(pid).run()?;
+        debug!("tracing finished!");
+
+        match waitpid(pid, None)? {
+            WaitStatus::Exited(_pid, status) => {
+                self.child_exit_status = status;
+            }
+            _ => unreachable!("child should have exited!"),
+        }
 
         exit(self.child_exit_status);
     }
