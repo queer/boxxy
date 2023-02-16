@@ -10,7 +10,7 @@ repository = "https://github.com/queer/boxxy"
 atty = "0.2.14"
 bat = { version = "0.22.1", default-features = false, features = ["atty", "regex-onig"] }
 byteorder = "1.4.3"
-clap = { version = "4.1.4", features = ["derive"] }
+clap = { version = "4.1.6", features = ["derive"] }
 color-eyre = { version = "0.6.2", features = ["issue-url"] }
 config = "0.13.3"
 ctrlc = "3.2.5"
