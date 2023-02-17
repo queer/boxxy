@@ -48,6 +48,7 @@ pub struct Opts<'a> {
     pub command: &'a mut Command,
     pub immutable_root: bool,
     pub trace: bool,
+    pub config_file_args: String,
 }
 
 impl<'a> Enclosure<'a> {

@@ -38,11 +38,21 @@ pub struct Args {
     )]
     pub command_with_args: Vec<String>,
     #[arg(short = 'l', long = "log-level", default_value = "info")]
+    
     pub log_level: String,
     #[arg(
         long = "force-colour",
         default_value = "false",
         help = "Force colour output even when stdout is not a tty."
+    )]
+    pub command_with_args2: Vec<String>,
+    #[arg(short = 'C', long = "config_file_args", default_value = "default")]
+    pub config_file_args: String,
+    #[arg(
+        
+        long = "config_file_args",
+        default_value = "false",
+        help = "Use diffrent configuration file than default one."
     )]
     pub force_colour: bool,
     #[arg(
@@ -74,7 +84,7 @@ fn main() -> Result<()> {
     setup_logging(&cfg, &self_exe)?;
 
     if let Some(BoxxySubcommand::Config) = cfg.command {
-        let config_path = config_file_path(&self_exe)?;
+        let config_path = config_file_path(&self_exe, &cfg)?;
         let mut printer = bat::PrettyPrinter::new();
         printer.input_file(config_path).print()?;
 
@@ -82,11 +92,11 @@ fn main() -> Result<()> {
     }
 
     // Load rules
-    let rules = load_rules(&self_exe)?;
+    let rules = load_rules(&self_exe, &cfg)?;
     info!("loaded {} rule(s)", rules.rules.len());
 
     // Do the do!
-    let (cmd, args) = (&cfg.command_with_args[0], &cfg.command_with_args[1..]);
+    let (cmd, args, args2) = (&cfg.command_with_args[0], &cfg.command_with_args[1..], &cfg.command_with_args2[1..]);
     let mut command = Command::new(cmd);
 
     // Pass through current env
@@ -96,6 +106,9 @@ fn main() -> Result<()> {
     if !args.is_empty() {
         command.args(args);
     }
+    if !args2.is_empty() {
+        command.args(args2);
+    }
 
     // Do the thing!
     enclosure::Enclosure::new(enclosure::Opts {
@@ -103,6 +116,7 @@ fn main() -> Result<()> {
         command: &mut command,
         immutable_root: cfg.immutable_root,
         trace: cfg.trace,
+        config_file_args: cfg.config_file_args,
     })
     .run()?;
 
@@ -140,7 +154,7 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
     Ok(())
 }
 
-fn config_file_path(self_exe: &str) -> Result<PathBuf> {
+fn config_file_path(self_exe: &str, cfg: &Args) -> Result<PathBuf> {
     let config_file = if self_exe.starts_with("target/debug") {
         "boxxy-dev.yaml"
     } else {
@@ -149,7 +163,7 @@ fn config_file_path(self_exe: &str) -> Result<PathBuf> {
 
     debug!("loading config: {}", config_file);
 
-    let config_path =
+    let mut config_path =
         enclosure::fs::append_all(&dirs::config_dir().unwrap(), vec!["boxxy", config_file]);
 
     fs::create_dir_all(config_path.parent().unwrap())?;
@@ -158,12 +172,16 @@ fn config_file_path(self_exe: &str) -> Result<PathBuf> {
         fs::write(&config_path, "rules: []")?;
         info!("created empty config at {}", config_path.display());
     }
+    if cfg.config_file_args != "default"{
+        config_path =PathBuf::from(&cfg.config_file_args);
+    }
 
     Ok(config_path)
+    
 }
 
-fn load_rules(self_exe: &str) -> Result<BoxxyConfig> {
-    let config_path = config_file_path(self_exe)?;
+fn load_rules(self_exe: &str, cfg: &Args) -> Result<BoxxyConfig> {
+    let config_path = config_file_path(self_exe, &cfg)?;
     let rules = if fs::metadata(&config_path)?.len() > 0 {
         let config = Config::builder()
             .add_source(config::File::new(
