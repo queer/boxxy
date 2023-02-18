@@ -181,7 +181,7 @@ fn config_file_path(self_exe: &str, cfg: &Args) -> Result<PathBuf> {
 }
 
 fn load_rules(self_exe: &str, cfg: &Args) -> Result<BoxxyConfig> {
-    let config_path = config_file_path(self_exe, &cfg)?;
+    let config_path = config_file_path(self_exe, cfg)?;
     let rules = if fs::metadata(&config_path)?.len() > 0 {
         let config = Config::builder()
             .add_source(config::File::new(
