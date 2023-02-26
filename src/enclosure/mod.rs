@@ -318,11 +318,25 @@ impl<'a> Enclosure<'a> {
 
             let rewrite_path = self.fs.fully_expand_path(&rule.rewrite)?;
 
+            debug!("source exists: {}", rewrite_path.exists());
+            debug!("target exists: {}", target_path.exists());
+
+            // If the target file doesn't exist, we have to create it in order to bind mount over it.
             match rule.mode {
                 RuleMode::File => {
+                    if !target_path.exists() {
+                        debug!("creating file: {target_path:?}");
+                        self.ensure_file(&target_path)?;
+                        self.created_files.push(target_path.clone());
+                    }
                     self.fs.bind_mount_rw(&rewrite_path, &target_path)?;
                 }
                 RuleMode::Directory => {
+                    if !target_path.exists() {
+                        debug!("creating directory: {target_path:?}");
+                        self.ensure_directory(&target_path)?;
+                        self.created_files.push(target_path.clone());
+                    }
                     self.fs.bind_mount_rw(&rewrite_path, &target_path)?;
                 }
             }
