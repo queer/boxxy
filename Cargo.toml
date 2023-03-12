@@ -10,21 +10,21 @@ repository = "https://github.com/queer/boxxy"
 atty = "0.2.14"
 bat = { version = "0.22.1", default-features = false, features = ["atty", "regex-onig"] }
 byteorder = "1.4.3"
-clap = { version = "4.1.6", features = ["derive"] }
+clap = { version = "4.1.8", features = ["derive"] }
 color-eyre = { version = "0.6.2", features = ["issue-url"] }
 config = "0.13.3"
 ctrlc = "3.2.5"
 dirs = "4.0.0"
 haikunator = "0.1.2"
 lazy_static = "1.4.0"
-libc = "0.2.139"
+libc = "0.2.140"
 log = "0.4.17"
 nix = "0.26.2"
 owo-colors = { version = "3.5.0", features = ["supports-color", "supports-colors"] }
 pretty_env_logger = "0.4.0"
 regex = "1.7.1"
 rlimit = "0.9.1"
-serde = { version = "1.0.152", features = ["derive"] }
+serde = { version = "1.0.154", features = ["derive"] }
 shellexpand = "3.0.0"
 strum = { version = "0.24.1", features = ["derive"] }
 syscall-numbers = "3.0.0"
