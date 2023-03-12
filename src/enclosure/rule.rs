@@ -68,13 +68,44 @@ impl Rule {
             return Ok(true);
         }
 
-        for binary in &self.only {
-            debug!("{}: resolving binary: {}", self.name, binary);
-            let expanded_binary = fs.fully_expand_path(binary)?;
-            let resolved_binary = fs.maybe_resolve_symlink(&expanded_binary)?;
+        for rule_binary in &self.only {
+            debug!("{}: resolving binary: {}", self.name, rule_binary);
+            let expanded_rule_binary = fs.fully_expand_path(rule_binary)?;
+            let resolved_rule_binary = fs.maybe_resolve_symlink(&expanded_rule_binary)?;
+            debug!(
+                "{}: `only` binary `{}` resolved to {}",
+                self.name,
+                rule_binary,
+                resolved_rule_binary.display()
+            );
 
-            if program == resolved_binary.file_name().unwrap() {
-                return Ok(true);
+            debug!("{}: comparing to `{:?}`", self.name, program);
+
+            if let Some(file_name) = resolved_rule_binary.file_name() {
+                if program == file_name {
+                    debug!(
+                        "{}: matched binary: {}",
+                        self.name,
+                        file_name.to_string_lossy()
+                    );
+                    return Ok(true);
+                } else {
+                    let resolved_program = which::which(program)?;
+                    debug!(
+                        "{}: `which` binary `{}` resolved to {}",
+                        self.name,
+                        program.to_string_lossy(),
+                        resolved_program.display()
+                    );
+                    if resolved_program == resolved_rule_binary {
+                        debug!(
+                            "{}: matched resolved binary: {}",
+                            self.name,
+                            program.to_string_lossy()
+                        );
+                        return Ok(true);
+                    }
+                }
             }
         }
 
