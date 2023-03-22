@@ -1,5 +1,5 @@
 use std::ffi::OsStr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use color_eyre::Result;
 use log::*;
@@ -69,46 +69,62 @@ impl Rule {
         }
 
         for rule_binary in &self.only {
-            debug!("{}: resolving binary: {}", self.name, rule_binary);
-            let expanded_rule_binary = fs.fully_expand_path(rule_binary)?;
-            let resolved_rule_binary = fs.maybe_resolve_symlink(&expanded_rule_binary)?;
-            debug!(
-                "{}: `only` binary `{}` resolved to {}",
-                self.name,
-                rule_binary,
-                resolved_rule_binary.display()
-            );
-
-            debug!("{}: comparing to `{:?}`", self.name, program);
-
-            if let Some(file_name) = resolved_rule_binary.file_name() {
-                if program == file_name {
-                    debug!(
-                        "{}: matched binary: {}",
-                        self.name,
-                        file_name.to_string_lossy()
-                    );
-                    return Ok(true);
-                } else {
-                    let resolved_program = which::which(program)?;
-                    debug!(
-                        "{}: `which` binary `{}` resolved to {}",
-                        self.name,
-                        program.to_string_lossy(),
-                        resolved_program.display()
-                    );
-                    if resolved_program == resolved_rule_binary {
-                        debug!(
-                            "{}: matched resolved binary: {}",
-                            self.name,
-                            program.to_string_lossy()
-                        );
-                        return Ok(true);
-                    }
-                }
+            if self.test_program(program, &PathBuf::from(rule_binary), fs)? {
+                debug!("{}: rule applies to binary!", self.name);
+                return Ok(true);
             }
         }
 
+        Ok(false)
+    }
+
+    fn test_program(&self, program: &OsStr, rule_binary: &Path, fs: &FsDriver) -> Result<bool> {
+        debug!(
+            "{}: testing program: program={program:?}, rule_binary={rule_binary:?}",
+            self.name
+        );
+
+        // Compare program by file name, ex. ls == ls
+        if let Some(file_name) = rule_binary.file_name() {
+            debug!("{}: comparing file names: program={program:?}, rule binary file_name={file_name:?}", self.name);
+            if program == file_name {
+                return Ok(true);
+            }
+        }
+
+        // Compare by given paths, ex. ls == /usr/bin/ls
+        if let Some(path) = rule_binary.to_str() {
+            debug!("{}: comparing binaries by given paths: program={program:?}, rule_binary={rule_binary:?}", self.name);
+            if program == path {
+                return Ok(true);
+            }
+        }
+
+        // Fully expand rule path and program path, and compare. ex. /usr/bin/ls == /bin/ls
+        let expanded_rule_binary = rule_binary.canonicalize()?;
+        let expanded_user_program = fs.fully_expand_path(&program.to_string_lossy().to_string())?;
+        debug!("{}: comparing binaries by full expansion: expanded_user_program={expanded_user_program:?}, expanded_rule_binary={expanded_rule_binary:?}", self.name);
+        if expanded_rule_binary == expanded_user_program {
+            return Ok(true);
+        }
+
+        // Resolve rule path and program path as symlinks, and compare. ex. /bin/ls == /bin/ls
+        let resolved_rule_binary = fs.maybe_resolve_symlink(&expanded_rule_binary)?;
+        let resolved_user_program = fs.maybe_resolve_symlink(&expanded_user_program)?;
+        debug!("{}: comparing binaries as resolved symlinks: resolved_user_program={resolved_user_program:?}, resolved_rule_binary={resolved_rule_binary:?}", self.name);
+        if resolved_rule_binary == resolved_user_program {
+            return Ok(true);
+        }
+
+        // Resolve both program and rule_binary with `which` and compare. ex. /usr/bin/ls == /usr/bin/ls
+        let which_rule_binary = which::which(rule_binary)?;
+        let which_user_program = which::which(program)?;
+        debug!("{}: comparing binaries with which(1): which_user_program={which_user_program:?}, which_rule_binary={which_user_program:?}", self.name);
+        if which_rule_binary == which_user_program {
+            return Ok(true);
+        }
+
+        debug!("{}: rule didn't match anything, does not apply!", self.name);
         Ok(false)
     }
 }
