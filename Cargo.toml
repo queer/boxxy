@@ -22,7 +22,7 @@ log = "0.4.17"
 nix = "0.26.2"
 owo-colors = { version = "3.5.0", features = ["supports-color", "supports-colors"] }
 pretty_env_logger = "0.4.0"
-regex = "1.7.1"
+regex = "1.7.2"
 rlimit = "0.9.1"
 serde = { version = "1.0.158", features = ["derive"] }
 shellexpand = "3.0.0"
