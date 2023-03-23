@@ -7,6 +7,7 @@ use clap::{Parser, Subcommand};
 use color_eyre::Result;
 use config::{Config, FileFormat};
 use log::*;
+use which::which;
 
 use crate::enclosure::rule::BoxxyConfig;
 
@@ -87,6 +88,13 @@ fn main() -> Result<()> {
 
     // Do the do!
     let (cmd, args) = (&cfg.command_with_args[0], &cfg.command_with_args[1..]);
+
+    if which(cmd).is_err() {
+        error!("command not found in $PATH: {}", cmd);
+        debug!("searched $PATH: {}", std::env::var("PATH")?);
+        std::process::exit(1);
+    }
+
     let mut command = Command::new(cmd);
 
     // Pass through current env
