@@ -101,9 +101,8 @@ impl Rule {
         }
 
         // Fully expand rule path and program path, and compare. ex. /usr/bin/ls == /bin/ls
+        let expanded_user_program = fs.fully_expand_path(&program.to_string_lossy().to_string())?;
         if let Ok(expanded_rule_binary) = rule_binary.canonicalize() {
-            let expanded_user_program =
-                fs.fully_expand_path(&program.to_string_lossy().to_string())?;
             debug!("{}: comparing binaries by full expansion: expanded_user_program={expanded_user_program:?}, expanded_rule_binary={expanded_rule_binary:?}", self.name);
             if expanded_rule_binary == expanded_user_program {
                 return Ok(true);
@@ -114,6 +113,20 @@ impl Rule {
             let resolved_user_program = fs.maybe_resolve_symlink(&expanded_user_program)?;
             debug!("{}: comparing binaries as resolved symlinks: resolved_user_program={resolved_user_program:?}, resolved_rule_binary={resolved_rule_binary:?}", self.name);
             if resolved_rule_binary == resolved_user_program {
+                return Ok(true);
+            }
+        } else {
+            // If we can't canonicalize the rule binary, try to resolve the
+            // user program symlinks.
+            let resolved_user_program = fs.maybe_resolve_symlink(&expanded_user_program)?;
+            debug!("{}: comparing rule binary to user program as resolved symlinks: resolved_user_program={resolved_user_program:?}, rule_binary={rule_binary:?}", self.name);
+            if let Some(file_name) = resolved_user_program.file_name() {
+                if file_name == rule_binary {
+                    debug!("{}: rule binary {rule_binary:?} matches user program file name for {resolved_user_program:?}", self.name);
+                    return Ok(true);
+                }
+            } else if rule_binary == resolved_user_program {
+                debug!("{}: rule binary {rule_binary:?} matches user program {resolved_user_program:?}", self.name);
                 return Ok(true);
             }
         }
