@@ -101,25 +101,27 @@ impl Rule {
         }
 
         // Fully expand rule path and program path, and compare. ex. /usr/bin/ls == /bin/ls
-        let expanded_rule_binary = rule_binary.canonicalize()?;
-        let expanded_user_program = fs.fully_expand_path(&program.to_string_lossy().to_string())?;
-        debug!("{}: comparing binaries by full expansion: expanded_user_program={expanded_user_program:?}, expanded_rule_binary={expanded_rule_binary:?}", self.name);
-        if expanded_rule_binary == expanded_user_program {
-            return Ok(true);
-        }
+        if let Ok(expanded_rule_binary) = rule_binary.canonicalize() {
+            let expanded_user_program =
+                fs.fully_expand_path(&program.to_string_lossy().to_string())?;
+            debug!("{}: comparing binaries by full expansion: expanded_user_program={expanded_user_program:?}, expanded_rule_binary={expanded_rule_binary:?}", self.name);
+            if expanded_rule_binary == expanded_user_program {
+                return Ok(true);
+            }
 
-        // Resolve rule path and program path as symlinks, and compare. ex. /bin/ls == /bin/ls
-        let resolved_rule_binary = fs.maybe_resolve_symlink(&expanded_rule_binary)?;
-        let resolved_user_program = fs.maybe_resolve_symlink(&expanded_user_program)?;
-        debug!("{}: comparing binaries as resolved symlinks: resolved_user_program={resolved_user_program:?}, resolved_rule_binary={resolved_rule_binary:?}", self.name);
-        if resolved_rule_binary == resolved_user_program {
-            return Ok(true);
+            // Resolve rule path and program path as symlinks, and compare. ex. /bin/ls == /bin/ls
+            let resolved_rule_binary = fs.maybe_resolve_symlink(&expanded_rule_binary)?;
+            let resolved_user_program = fs.maybe_resolve_symlink(&expanded_user_program)?;
+            debug!("{}: comparing binaries as resolved symlinks: resolved_user_program={resolved_user_program:?}, resolved_rule_binary={resolved_rule_binary:?}", self.name);
+            if resolved_rule_binary == resolved_user_program {
+                return Ok(true);
+            }
         }
 
         // Resolve both program and rule_binary with `which` and compare. ex. /usr/bin/ls == /usr/bin/ls
         let which_rule_binary = which::which(rule_binary)?;
         let which_user_program = which::which(program)?;
-        debug!("{}: comparing binaries with which(1): which_user_program={which_user_program:?}, which_rule_binary={which_user_program:?}", self.name);
+        debug!("{}: comparing binaries with which(1): which_user_program={which_user_program:?}, which_rule_binary={which_rule_binary:?}", self.name);
         if which_rule_binary == which_user_program {
             return Ok(true);
         }
