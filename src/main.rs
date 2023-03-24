@@ -137,6 +137,7 @@ fn main() -> Result<()> {
                     warn!("SAFETY IS NOT GUARANTEED!!!");
                     warn!("this config was automatically generated and may not be correct.");
                     warn!("please review the config before using it!");
+                    warn!("report bad rules!! https://github.com/queer/boxxy/issues/new");
                     info!("rules generated: {}", rules.len());
                     info!(
                         "put relevant rules in your config file: {}",

@@ -1,6 +1,6 @@
 [package]
 name = "boxxy"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 repository = "https://github.com/queer/boxxy"
 
