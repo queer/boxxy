@@ -1,0 +1,1330 @@
+[
+  {
+    "name": "abook",
+    "paths": [
+      "~/.abook"
+    ],
+    "fixes": [
+      "~/.abook:~/.config/abook"
+    ]
+  },
+  {
+    "name": "ack",
+    "paths": [
+      "~/.ackrc"
+    ],
+    "fixes": [
+      "~/.ackrc:~/.config/ack/ackrc"
+    ]
+  },
+  {
+    "name": "Ansible",
+    "paths": [
+      "~/.ansible"
+    ],
+    "fixes": [
+      "~/.ansible:~/.config/ansible"
+    ]
+  },
+  {
+    "name": "asdf-vm",
+    "paths": [
+      "~/.asdfrc",
+      "~/.asdf/"
+    ],
+    "fixes": [
+      "~/.asdfrc:~/.config/asdf/asdfrc",
+      "~/.asdf/:~/.local/share/asdf"
+    ]
+  },
+  {
+    "name": "aspell",
+    "paths": [
+      "~/.aspell.conf"
+    ],
+    "fixes": [
+      "~/.aspell.conf:~/.config/aspell/aspell.conf"
+    ]
+  },
+  {
+    "name": "Atom",
+    "paths": [
+      "~/.atom"
+    ],
+    "fixes": [
+      "~/.atom:~/.local/share/atom"
+    ]
+  },
+  {
+    "name": "aws-cli",
+    "paths": [
+      "~/.aws"
+    ],
+    "fixes": [
+      "~/.aws:~/.config/aws"
+    ]
+  },
+  {
+    "name": "bashdb",
+    "paths": [
+      "~/.bashdbinit",
+      "~/.bashdb_hist"
+    ],
+    "fixes": [
+      "~/.bashdbinit:~/.config/bashdb/bashdbinit",
+      "~/.bashdb_hist:~/.local/share/bashdb/bashdb_hist"
+    ]
+  },
+  {
+    "name": "bazaar",
+    "paths": [
+      "~/.bazaar",
+      "~/.bzr.log"
+    ],
+    "fixes": [
+      "~/.bzr.log:~/.local/share/bazaar/bzr.log",
+      "~/.bazaar:~/.config/bazaar"
+    ]
+  },
+  {
+    "name": "bogofilter",
+    "paths": [
+      "~/.bogofilter"
+    ],
+    "fixes": [
+      "~/.bogofilter:~/.local/share/bogofilter"
+    ]
+  },
+  {
+    "name": "btpd-git",
+    "paths": [
+      "~/.btpd/"
+    ],
+    "fixes": [
+      "~/.btpd/:~/.config/btpd"
+    ]
+  },
+  {
+    "name": "calc",
+    "paths": [
+      "~/.calc_history"
+    ],
+    "fixes": [
+      "~/.calc_history:~/.cache/calc/calc_history"
+    ]
+  },
+  {
+    "name": "Rust - Cargo",
+    "paths": [
+      "~/.cargo"
+    ],
+    "fixes": [
+      "~/.cargo:~/.local/share/cargo"
+    ]
+  },
+  {
+    "name": "cataclysm-dda",
+    "paths": [
+      "~/.cataclysm-dda"
+    ],
+    "fixes": [
+      "~/.cataclysm-dda:~/.local/share/cataclysm-dda"
+    ]
+  },
+  {
+    "name": "cd-bookmark",
+    "paths": [
+      "~/.cdbookmark"
+    ],
+    "fixes": [
+      "~/.cdbookmark:~/.config/cd-bookmark"
+    ]
+  },
+  {
+    "name": "cgdb",
+    "paths": [
+      "~/.cgdb"
+    ],
+    "fixes": [
+      "~/.cgdb:~/.config/cgdb"
+    ]
+  },
+  {
+    "name": "chez-scheme",
+    "paths": [
+      "~/.chezscheme_history"
+    ],
+    "fixes": [
+      "~/.chezscheme_history:~/.local/share/chez-scheme/chezscheme_history"
+    ]
+  },
+  {
+    "name": "cinelerra",
+    "paths": [
+      "~/.bcast5"
+    ],
+    "fixes": [
+      "~/.bcast5:~/.local/share/cinelerra/bcast5"
+    ]
+  },
+  {
+    "name": "conky",
+    "paths": [
+      "~/.conkyrc"
+    ],
+    "fixes": [
+      "~/.conkyrc:~/.config/conky/conkyrc"
+    ]
+  },
+  {
+    "name": "claws-mail",
+    "paths": [
+      "~/.claws-mail"
+    ],
+    "fixes": [
+      "~/.claws-mail:~/.local/share/claws-mail"
+    ]
+  },
+  {
+    "name": "coreutils",
+    "paths": [
+      "~/.dircolors"
+    ],
+    "fixes": [
+      "~/.dircolors:~/.config/coreutils/dircolors"
+    ]
+  },
+  {
+    "name": "crawl",
+    "paths": [
+      "~/.crawl"
+    ],
+    "fixes": [
+      "~/.crawl:~/.local/share/crawl"
+    ]
+  },
+  {
+    "name": "clusterssh",
+    "paths": [
+      "~/.clusterssh/"
+    ],
+    "fixes": [
+      "~/.clusterssh/:~/.config/clusterssh"
+    ]
+  },
+  {
+    "name": "CUDA",
+    "paths": [
+      "~/.nv"
+    ],
+    "fixes": [
+      "~/.nv:~/.cache/cuda"
+    ]
+  },
+  {
+    "name": "dict",
+    "paths": [
+      "~/.dictrc"
+    ],
+    "fixes": [
+      "~/.dictrc:~/.config/dict/dictrc"
+    ]
+  },
+  {
+    "name": "Docker",
+    "paths": [
+      "~/.docker"
+    ],
+    "fixes": [
+      "~/.docker:~/.config/docker"
+    ]
+  },
+  {
+    "name": "docker-machine",
+    "paths": [
+      "~/.docker/machine"
+    ],
+    "fixes": [
+      "~/.docker/machine:~/.local/share/docker/machine"
+    ]
+  },
+  {
+    "name": "DOSBox",
+    "paths": [
+      "~/.dosbox"
+    ],
+    "fixes": [
+      "~/.dosbox:~/.config/dosbox"
+    ]
+  },
+  {
+    "name": "dub",
+    "paths": [
+      "~/.dub"
+    ],
+    "fixes": [
+      "~/.dub:~/.local/share/dub"
+    ]
+  },
+  {
+    "name": "Electrum Bitcoin Wallet",
+    "paths": [
+      "~/.electrum"
+    ],
+    "fixes": [
+      "~/.electrum:~/.local/share/electrum"
+    ]
+  },
+  {
+    "name": "ELinks",
+    "paths": [
+      "~/.elinks"
+    ],
+    "fixes": [
+      "~/.elinks:~/.config/elinks"
+    ]
+  },
+  {
+    "name": "elixir",
+    "paths": [
+      "~/.mix"
+    ],
+    "fixes": [
+      "~/.mix:~/.local/share/elixir"
+    ]
+  },
+  {
+    "name": "Elm",
+    "paths": [
+      "~/.elm"
+    ],
+    "fixes": [
+      "~/.elm:~/.config/elm"
+    ]
+  },
+  {
+    "name": "fceux",
+    "paths": [
+      "~/.fceux/"
+    ],
+    "fixes": [
+      "~/.fceux/:~/.config/fceux"
+    ]
+  },
+  {
+    "name": "FFmpeg",
+    "paths": [
+      "~/.ffmpeg"
+    ],
+    "fixes": [
+      "~/.ffmpeg:~/.config/ffmpeg"
+    ]
+  },
+  {
+    "name": "flutter",
+    "paths": [
+      "~/.flutter",
+      "~/.flutter_settings",
+      "~/.flutter_tool_state",
+      "~/.pub-cache"
+    ],
+    "fixes": [
+      "~/.flutter:~/.local/share/flutter",
+      "~/.flutter_settings:~/.config/flutter/flutter_settings",
+      "~/.flutter_tool_state:~/.config/flutter/flutter_tool_state",
+      "~/.pub-cache:~/.cache/flutter"
+    ]
+  },
+  {
+    "name": "emscripten",
+    "paths": [
+      "~/.emscripten",
+      "~/.emscripten_sanity",
+      "~/.emscripten_ports",
+      "~/.emscripten_cache__last_clear"
+    ],
+    "fixes": [
+      "~/.emscripten:~/.config/emscripten/emscripten",
+      "~/.emscripten_sanity:~/.config/emscripten/emscripten_sanity",
+      "~/.emscripten_ports:~/.config/emscripten/emscripten_ports",
+      "~/.emscripten_cache__last_clear:~/.cache/emscripten/emscripten_cache__last_clear"
+    ]
+  },
+  {
+    "name": "get_iplayer",
+    "paths": [
+      "~/.get_iplayer"
+    ],
+    "fixes": [
+      "~/.get_iplayer:~/.local/share/get_iplayer"
+    ]
+  },
+  {
+    "name": "getmail",
+    "paths": [
+      "~/.getmail"
+    ],
+    "fixes": [
+      "~/.getmail:~/.config/getmail"
+    ]
+  },
+  {
+    "name": "ghc",
+    "paths": [
+      "~/.ghci"
+    ],
+    "fixes": [
+      "~/.ghci:~/.config/ghc/ghci"
+    ]
+  },
+  {
+    "name": "ghcup-hs-bin",
+    "paths": [
+      "~/.ghcup"
+    ],
+    "fixes": [
+      "~/.ghcup:~/.local/share/ghcup"
+    ]
+  },
+  {
+    "name": "gliv",
+    "paths": [
+      "~/.glivrc"
+    ],
+    "fixes": [
+      "~/.glivrc:~/.config/gliv/glivrc"
+    ]
+  },
+  {
+    "name": "gnuradio",
+    "paths": [
+      "~/.gnuradio"
+    ],
+    "fixes": [
+      "~/.gnuradio:~/.config/gnuradio"
+    ]
+  },
+  {
+    "name": "GnuPG",
+    "paths": [
+      "~/.gnupg"
+    ],
+    "fixes": [
+      "~/.gnupg:~/.local/share/gnupg"
+    ]
+  },
+  {
+    "name": "Go",
+    "paths": [
+      "~/go"
+    ],
+    "fixes": [
+      "~/go:~/.local/share/go"
+    ]
+  },
+  {
+    "name": "Google Earth",
+    "paths": [
+      "~/.googleearth"
+    ],
+    "fixes": [
+      "~/.googleearth:~/.local/share/googleearth"
+    ]
+  },
+  {
+    "name": "gopass",
+    "paths": [
+      "~/.password-store"
+    ],
+    "fixes": [
+      "~/.password-store:~/.local/share/password-store"
+    ]
+  },
+  {
+    "name": "gpodder",
+    "paths": [
+      "~/gPodder"
+    ],
+    "fixes": [
+      "~/gPodder:~/.local/share/gpodder"
+    ]
+  },
+  {
+    "name": "GQ LDAP client",
+    "paths": [
+      "~/.gq",
+      "~/.gq-state"
+    ],
+    "fixes": [
+      "~/.gq:~/.config/gq",
+      "~/.gq-state:~/.local/share/gq"
+    ]
+  },
+  {
+    "name": "Gradle",
+    "paths": [
+      "~/.gradle"
+    ],
+    "fixes": [
+      "~/.gradle:~/.local/share/gradle"
+    ]
+  },
+  {
+    "name": "GTK 1",
+    "paths": [
+      "~/.gtkrc"
+    ],
+    "fixes": [
+      "~/.gtkrc:~/.config/gtk-1.0/gtkrc"
+    ]
+  },
+  {
+    "name": "GTK 2",
+    "paths": [
+      "~/.gtkrc-2.0"
+    ],
+    "fixes": [
+      "~/.gtkrc-2.0:~/.config/gtk-2.0/gtkrc"
+    ]
+  },
+  {
+    "name": "hledger",
+    "paths": [
+      "~/.hledger.journal"
+    ],
+    "fixes": [
+      "~/.hledger.journal:~/.local/share/hledger/hledger.journal"
+    ]
+  },
+  {
+    "name": "imapfilter",
+    "paths": [
+      "~/.imapfilter"
+    ],
+    "fixes": [
+      "~/.imapfilter:~/.config/imapfilter"
+    ]
+  },
+  {
+    "name": "IPFS",
+    "paths": [
+      "~/.ipfs"
+    ],
+    "fixes": [
+      "~/.ipfs:~/.local/share/ipfs"
+    ]
+  },
+  {
+    "name": "irb",
+    "paths": [
+      "~/.irbrc"
+    ],
+    "fixes": [
+      "~/.irbrc:~/.config/irb/irbrc"
+    ]
+  },
+  {
+    "name": "irssi",
+    "paths": [
+      "~/.irssi"
+    ],
+    "fixes": [
+      "~/.irssi:~/.config/irssi"
+    ]
+  },
+  {
+    "name": "isync",
+    "paths": [
+      "~/.mbsyncrc"
+    ],
+    "fixes": [
+      "~/.mbsyncrc:~/.config/isync/mbsyncrc"
+    ]
+  },
+  {
+    "name": "Java - OpenJDK",
+    "paths": [
+      "~/.java/.userPrefs"
+    ],
+    "fixes": [
+      "~/.java/.userPrefs:~/.local/share/java/.userPrefs"
+    ]
+  },
+  {
+    "name": "jupyter",
+    "paths": [
+      "~/.jupyter"
+    ],
+    "fixes": [
+      "~/.jupyter:~/.local/share/jupyter"
+    ]
+  },
+  {
+    "name": "k9s",
+    "paths": [
+      "~/.k9s"
+    ],
+    "fixes": [
+      "~/.k9s:~/.config/k9s"
+    ]
+  },
+  {
+    "name": "KDE",
+    "paths": [
+      "~/.kde",
+      "~/.kde4"
+    ],
+    "fixes": [
+      "~/.kde:~/.config/kde",
+      "~/.kde4:~/.config/kde4"
+    ]
+  },
+  {
+    "name": "keychain",
+    "paths": [
+      "~/.keychain"
+    ],
+    "fixes": [
+      "~/.keychain:~/.local/share/keychain"
+    ]
+  },
+  {
+    "name": "kodi",
+    "paths": [
+      "~/.kodi"
+    ],
+    "fixes": [
+      "~/.kodi:~/.local/share/kodi"
+    ]
+  },
+  {
+    "name": "kscript",
+    "paths": [
+      "~/.kscript"
+    ],
+    "fixes": [
+      "~/.kscript:~/.cache/kscript"
+    ]
+  },
+  {
+    "name": "ledger",
+    "paths": [
+      "~/.ledgerrc",
+      "~/.pricedb"
+    ],
+    "fixes": [
+      "~/.ledgerrc:~/.config/ledger/ledgerrc",
+      "~/.pricedb:~/.local/share/ledger/pricedb"
+    ]
+  },
+  {
+    "name": "Leiningen",
+    "paths": [
+      "~/.lein",
+      "~/.m2"
+    ],
+    "fixes": [
+      "~/.lein:~/.local/share/lein",
+      "~/.m2:~/.local/share/m2"
+    ]
+  },
+  {
+    "name": "libdvdcss",
+    "paths": [
+      "~/.dvdcss"
+    ],
+    "fixes": [
+      "~/.dvdcss:~/.local/share/dvdcss"
+    ]
+  },
+  {
+    "name": "ltrace",
+    "paths": [
+      "~/.ltrace.conf"
+    ],
+    "fixes": [
+      "~/.ltrace.conf:~/.config/ltrace/ltrace.conf"
+    ]
+  },
+  {
+    "name": "m17n-db",
+    "paths": [
+      "~/.m17n.d"
+    ],
+    "fixes": [
+      "~/.m17n.d:~/.local/share/m17n"
+    ]
+  },
+  {
+    "name": "maptool-bin",
+    "paths": [
+      "~/.maptool-rptools"
+    ],
+    "fixes": [
+      "~/.maptool-rptools:~/.local/share/maptool-rptools"
+    ]
+  },
+  {
+    "name": "maven",
+    "paths": [
+      "~/.m2"
+    ],
+    "fixes": [
+      "~/.m2:~/.local/share/m2"
+    ]
+  },
+  {
+    "name": "Mathematica",
+    "paths": [
+      "~/.Mathematica"
+    ],
+    "fixes": [
+      "~/.Mathematica:~/.config/Mathematica"
+    ]
+  },
+  {
+    "name": "maxima",
+    "paths": [
+      "~/.maxima"
+    ],
+    "fixes": [
+      "~/.maxima:~/.config/maxima"
+    ]
+  },
+  {
+    "name": "mednafen",
+    "paths": [
+      "~/.mednafen"
+    ],
+    "fixes": [
+      "~/.mednafen:~/.config/mednafen"
+    ]
+  },
+  {
+    "name": "minikube",
+    "paths": [
+      "~/.minikube"
+    ],
+    "fixes": [
+      "~/.minikube:~/.local/share/minikube"
+    ]
+  },
+  {
+    "name": "mitmproxy",
+    "paths": [
+      "~/.mitmproxy"
+    ],
+    "fixes": [
+      "~/.mitmproxy:~/.config/mitmproxy"
+    ]
+  },
+  {
+    "name": "MOC",
+    "paths": [
+      "~/.moc"
+    ],
+    "fixes": [
+      "~/.moc:~/.config/moc"
+    ]
+  },
+  {
+    "name": "monero",
+    "paths": [
+      "~/.bitmonero"
+    ],
+    "fixes": [
+      "~/.bitmonero:~/.local/share/monero"
+    ]
+  },
+  {
+    "name": "most",
+    "paths": [
+      "~/.mostrc"
+    ],
+    "fixes": [
+      "~/.mostrc:~/.config/most/mostrc"
+    ]
+  },
+  {
+    "name": "MPlayer",
+    "paths": [
+      "~/.mplayer"
+    ],
+    "fixes": [
+      "~/.mplayer:~/.config/mplayer"
+    ]
+  },
+  {
+    "name": "mypy",
+    "paths": [
+      "~/.config/mypy/config",
+      "~/.mypy.ini",
+      "~/.mypy_cache"
+    ],
+    "fixes": [
+      "~/.config/mypy/config:~/.config/mypy/config",
+      "~/.mypy.ini:~/.config/mypy/config",
+      "~/.mypy_cache:~/.cache/mypy"
+    ]
+  },
+  {
+    "name": "MySQL",
+    "paths": [
+      "~/.mysql_history",
+      "~/.my.cnf",
+      "~/.mylogin.cnf"
+    ],
+    "fixes": [
+      "~/.mysql_history:~/.local/share/mysql_history",
+      "~/.my.cnf:~/.config/my.cnf",
+      "~/.mylogin.cnf:~/.config/mylogin.cnf"
+    ]
+  },
+  {
+    "name": "mysql-workbench",
+    "paths": [
+      "~/.mysql/workbench"
+    ],
+    "fixes": [
+      "~/.mysql/workbench:~/.local/share/mysql/workbench"
+    ]
+  },
+  {
+    "name": "ncurses",
+    "paths": [
+      "~/.terminfo"
+    ],
+    "fixes": [
+      "~/.terminfo:~/.local/share/terminfo"
+    ]
+  },
+  {
+    "name": "n",
+    "paths": [
+      "/usr/local/n"
+    ],
+    "fixes": [
+      "/usr/local/n:~/.local/share/n"
+    ]
+  },
+  {
+    "name": "ncmpc",
+    "paths": [
+      "~/.ncmpc"
+    ],
+    "fixes": [
+      "~/.ncmpc:~/.config/ncmpc"
+    ]
+  },
+  {
+    "name": "Netbeans",
+    "paths": [
+      "~/.netbeans"
+    ],
+    "fixes": [
+      "~/.netbeans:~/.local/share/netbeans"
+    ]
+  },
+  {
+    "name": "Node.js",
+    "paths": [
+      "~/.node_repl_history"
+    ],
+    "fixes": [
+      "~/.node_repl_history:~/.local/share/node_repl_history"
+    ]
+  },
+  {
+    "name": "npm",
+    "paths": [
+      "~/.npm",
+      "~/.npmrc"
+    ],
+    "fixes": [
+      "~/.npm:~/.local/share/npm",
+      "~/.npmrc:~/.config/npm/npmrc"
+    ]
+  },
+  {
+    "name": "opam",
+    "paths": [
+      "~/.opam"
+    ],
+    "fixes": [
+      "~/.opam:~/.local/share/opam"
+    ]
+  },
+  {
+    "name": "pnpm",
+    "paths": [
+      "~/.pnpm-store"
+    ],
+    "fixes": [
+      "~/.pnpm-store:~/.local/share/pnpm-store"
+    ]
+  },
+  {
+    "name": "PuTTY",
+    "paths": [
+      "~/.putty/"
+    ],
+    "fixes": [
+      "~/.putty/:~/.config/putty/"
+    ]
+  },
+  {
+    "name": "nuget",
+    "paths": [
+      "~/.nuget/packages"
+    ],
+    "fixes": [
+      "~/.nuget/packages:~/.local/share/nuget/packages"
+    ]
+  },
+  {
+    "name": "NVIDIA",
+    "paths": [
+      "~/.nv"
+    ],
+    "fixes": [
+      "~/.nv:~/.cache/nv"
+    ]
+  },
+  {
+    "name": "nvidia-settings",
+    "paths": [
+      "~/.nvidia-settings-rc"
+    ],
+    "fixes": [
+      "~/.nvidia-settings-rc:~/.config/nvidia-settings-rc"
+    ]
+  },
+  {
+    "name": "nvm",
+    "paths": [
+      "~/.nvm"
+    ],
+    "fixes": [
+      "~/.nvm:~/.local/share/nvm"
+    ]
+  },
+  {
+    "name": "Octave",
+    "paths": [
+      "~/octave",
+      "~/.octave_packages",
+      "~/.octave_hist"
+    ],
+    "fixes": [
+      "~/octave:~/.local/share/octave",
+      "~/.octave_packages:~/.local/share/octave",
+      "~/.octave_hist:~/.local/share/octave"
+    ]
+  },
+  {
+    "name": "openscad",
+    "paths": [
+      "~/.OpenSCAD"
+    ],
+    "fixes": [
+      "~/.OpenSCAD:~/.local/share/OpenSCAD"
+    ]
+  },
+  {
+    "name": "parallel",
+    "paths": [
+      "~/.parallel"
+    ],
+    "fixes": [
+      "~/.parallel:~/.config/parallel"
+    ]
+  },
+  {
+    "name": "pass",
+    "paths": [
+      "~/.password-store"
+    ],
+    "fixes": [
+      "~/.password-store:~/.local/share/password-store"
+    ]
+  },
+  {
+    "name": "Pidgin",
+    "paths": [
+      "~/.purple"
+    ],
+    "fixes": [
+      "~/.purple:~/.local/share/pidgin"
+    ]
+  },
+  {
+    "name": "PostgreSQL",
+    "paths": [
+      "~/.psqlrc",
+      "~/.psql_history",
+      "~/.pgpass",
+      "~/.pg_service.conf"
+    ],
+    "fixes": [
+      "~/.psqlrc:~/.config/psqlrc",
+      "~/.psql_history:~/.local/share/psql_history",
+      "~/.pgpass:~/.config/pgpass",
+      "~/.pg_service.conf:~/.config/pg_service.conf"
+    ]
+  },
+  {
+    "name": "pyenv",
+    "paths": [
+      "~/.pyenv"
+    ],
+    "fixes": [
+      "~/.pyenv:~/.local/share/pyenv"
+    ]
+  },
+  {
+    "name": "python-azure-cli",
+    "paths": [
+      "~/.azure"
+    ],
+    "fixes": [
+      "~/.azure:~/.config/azure"
+    ]
+  },
+  {
+    "name": "python-grip",
+    "paths": [
+      "~/.grip"
+    ],
+    "fixes": [
+      "~/.grip:~/.config/grip"
+    ]
+  },
+  {
+    "name": "python-setuptools",
+    "paths": [
+      "~/.python-eggs"
+    ],
+    "fixes": [
+      "~/.python-eggs:~/.cache/python-eggs"
+    ]
+  },
+  {
+    "name": "racket",
+    "paths": [
+      "~/.racketrc",
+      "~/.racket"
+    ],
+    "fixes": [
+      "~/.racketrc:~/.config/racketrc",
+      "~/.racket:~/.local/share/racket"
+    ]
+  },
+  {
+    "name": "rbenv",
+    "paths": [
+      "~/.rbenv"
+    ],
+    "fixes": [
+      "~/.rbenv:~/.local/share/rbenv"
+    ]
+  },
+  {
+    "name": "nodenv",
+    "paths": [
+      "~/.nodenv"
+    ],
+    "fixes": [
+      "~/.nodenv:~/.local/share/nodenv"
+    ]
+  },
+  {
+    "name": "readline",
+    "paths": [
+      "~/.inputrc"
+    ],
+    "fixes": [
+      "~/.inputrc:~/.config/inputrc"
+    ]
+  },
+  {
+    "name": "recoll",
+    "paths": [
+      "~/.recoll"
+    ],
+    "fixes": [
+      "~/.recoll:~/.config/recoll"
+    ]
+  },
+  {
+    "name": "redis",
+    "paths": [
+      "~/.rediscli_history",
+      "~/.redisclirc"
+    ],
+    "fixes": [
+      "~/.rediscli_history:~/.local/share/rediscli_history",
+      "~/.redisclirc:~/.config/redisclirc"
+    ]
+  },
+  {
+    "name": "ruby-solargraph",
+    "paths": [
+      "~/.solargraph/cache/"
+    ],
+    "fixes": [
+      "~/.solargraph/cache/:~/.cache/solargraph"
+    ]
+  },
+  {
+    "name": "Rust#Rustup",
+    "paths": [
+      "~/.rustup"
+    ],
+    "fixes": [
+      "~/.rustup:~/.local/share/rustup"
+    ]
+  },
+  {
+    "name": "sbt",
+    "paths": [
+      "~/.sbt",
+      "~/.ivy2"
+    ],
+    "fixes": [
+      "~/.sbt:~/.config/sbt",
+      "~/.ivy2:~/.cache/ivy2"
+    ]
+  },
+  {
+    "name": "SageMath",
+    "paths": [
+      "~/.sage"
+    ],
+    "fixes": [
+      "~/.sage:~/.local/share/sage"
+    ]
+  },
+  {
+    "name": "GNU Screen",
+    "paths": [
+      "~/.screenrc"
+    ],
+    "fixes": [
+      "~/.screenrc:~/.config/screenrc"
+    ]
+  },
+  {
+    "name": "simplescreenrecorder",
+    "paths": [
+      "~/.ssr/"
+    ],
+    "fixes": [
+      "~/.ssr/:~/.local/share/ssr"
+    ]
+  },
+  {
+    "name": "spacemacs",
+    "paths": [
+      "~/.spacemacs",
+      "~/.spacemacs.d"
+    ],
+    "fixes": [
+      "~/.spacemacs:~/.config/spacemacs/init.el",
+      "~/.spacemacs.d:~/.config/spacemacs.d"
+    ]
+  },
+  {
+    "name": "Haskell - Stack",
+    "paths": [
+      "~/.stack"
+    ],
+    "fixes": [
+      "~/.stack:~/.local/share/stack"
+    ]
+  },
+  {
+    "name": "subversion",
+    "paths": [
+      "~/.subversion"
+    ],
+    "fixes": [
+      "~/.subversion:~/.config/subversion"
+    ]
+  },
+  {
+    "name": "Local TeX Live TeXmf tree, TeXmf caches and config",
+    "paths": [
+      "~/texmf",
+      "~/.texlive/texmf-var",
+      "~/.texlive/texmf-config"
+    ],
+    "fixes": [
+      "~/.texlive/texmf-var:~/.cache/texlive/texmf-var",
+      "~/.texlive/texmf-config:~/.config/texlive/texmf-config",
+      "~/texmf:~/.local/share/texmf"
+    ]
+  },
+  {
+    "name": "TeXmacs",
+    "paths": [
+      "~/.TeXmacs"
+    ],
+    "fixes": [
+      "~/.TeXmacs:~/.local/state/texmacs"
+    ]
+  },
+  {
+    "name": "tiptop",
+    "paths": [
+      "~/.tiptoprc"
+    ],
+    "fixes": [
+      "~/.tiptoprc:~/.config/tiptop/tiptoprc"
+    ]
+  },
+  {
+    "name": "ruby-travis",
+    "paths": [
+      "~/.travis/"
+    ],
+    "fixes": [
+      "~/.travis:~/.config/travis"
+    ]
+  },
+  {
+    "name": "uncrustify",
+    "paths": [
+      "~/.uncrustify.cfg"
+    ],
+    "fixes": [
+      "~/.uncrustify.cfg:~/.config/uncrustify/uncrustify.cfg"
+    ]
+  },
+  {
+    "name": "Unison",
+    "paths": [
+      "~/.unison"
+    ],
+    "fixes": [
+      "~/.unison:~/.local/share/unison"
+    ]
+  },
+  {
+    "name": "units",
+    "paths": [
+      "~/.units_history"
+    ],
+    "fixes": [
+      "~/.units_history:~/.cache/units_history"
+    ]
+  },
+  {
+    "name": "urxvtd",
+    "paths": [
+      "~/.urxvt/urxvtd-hostname"
+    ],
+    "fixes": [
+      "~/.urxvt/urxvtd-hostname:~/.local/state/urxvt/urxvtd-hostname"
+    ]
+  },
+  {
+    "name": "Vagrant",
+    "paths": [
+      "~/.vagrant.d",
+      "~/.vagrant.d/aliases"
+    ],
+    "fixes": [
+      "~/.vagrant.d/aliases:~/.config/vagrant.d/aliases",
+      "~/.vagrant.d:~/.local/share/vagrant.d"
+    ]
+  },
+  {
+    "name": "virtualenv",
+    "paths": [
+      "~/.virtualenvs"
+    ],
+    "fixes": [
+      "~/.virtualenvs:~/.local/share/virtualenvs"
+    ]
+  },
+  {
+    "name": "Visual Studio Code",
+    "paths": [
+      "~/.vscode-oss/"
+    ],
+    "fixes": [
+      "~/.vscode-oss:~/.local/share/vscode-oss"
+    ]
+  },
+  {
+    "name": "VSCodium",
+    "paths": [
+      "~/.vscode-oss/"
+    ],
+    "fixes": [
+      "~/.vscode-oss:~/.local/share/vscodium"
+    ]
+  },
+  {
+    "name": "w3m",
+    "paths": [
+      "~/.w3m"
+    ],
+    "fixes": [
+      "~/.w3m:~/.config/w3m"
+    ]
+  },
+  {
+    "name": "wget",
+    "paths": [
+      "~/.wgetrc",
+      "~/.wget-hsts"
+    ],
+    "fixes": [
+      "~/.wgetrc:~/.config/wget/wgetrc",
+      "~/.wget-hsts:~/.local/share/wget-hsts"
+    ]
+  },
+  {
+    "name": "wine",
+    "paths": [
+      "~/.wine"
+    ],
+    "fixes": [
+      "~/.wine:~/.local/share/wineprefixes/default"
+    ]
+  },
+  {
+    "name": "xbindkeys",
+    "paths": [
+      "~/.xbindkeysrc"
+    ],
+    "fixes": [
+      "~/.xbindkeysrc:~/.config/xbindkeys/config"
+    ]
+  },
+  {
+    "name": "z",
+    "paths": [
+      "~/.z"
+    ],
+    "fixes": [
+      "~/.z:~/.local/share/z/z"
+    ]
+  },
+  {
+    "name": "yarn",
+    "paths": [
+      "~/.yarnrc",
+      "~/.yarn/",
+      "~/.yarncache/",
+      "~/.yarn-config/"
+    ],
+    "fixes": [
+      "~/.yarnrc:~/.config/yarn/yarnrc",
+      "~/.yarn/:~/.config/yarn/global",
+      "~/.yarncache/:~/.cache/yarn",
+      "~/.yarn-config/:~/.config/yarn/local"
+    ]
+  }
+]

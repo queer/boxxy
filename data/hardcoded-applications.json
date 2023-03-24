@@ -1,0 +1,1001 @@
+[
+  {
+    "name": "adb & Android Studio",
+    "paths": [
+      "~/.android/"
+    ],
+    "fixes": [
+      "~/.android:~/.local/share/android"
+    ]
+  },
+  {
+    "name": "aegisub",
+    "paths": [
+      "~/.aegisub/"
+    ],
+    "fixes": [
+      "~/.aegisub:~/.local/share/aegisub"
+    ]
+  },
+  {
+    "name": "alpine",
+    "paths": [
+      "~/.pinerc",
+      "~/.addressbook",
+      "~/.pine-debug[1-4]",
+      "~/.newsrc",
+      "~/.mailcap",
+      "~/.mime.types",
+      "~/.pine-interrupted-mail"
+    ],
+    "fixes": [
+      "~/.pinerc:~/.config/alpine/pinerc",
+      "~/.addressbook:~/.config/alpine/addressbook",
+      "~/.newsrc:~/.config/alpine/newsrc",
+      "~/.mailcap:~/.config/alpine/mailcap",
+      "~/.mime.types:~/.config/alpine/mime.types",
+      "~/.pine-interrupted-mail:~/.config/alpine/pine-interrupted-mail"
+    ]
+  },
+  {
+    "name": "aMule",
+    "paths": [
+      "~/.aMule"
+    ],
+    "fixes": [
+      "~/.aMule:~/.local/share/aMule"
+    ]
+  },
+  {
+    "name": "anthy",
+    "paths": [
+      "~/.anthy"
+    ],
+    "fixes": [
+      "~/.anthy:~/.local/share/anthy"
+    ]
+  },
+  {
+    "name": "Apache Directory Studio",
+    "paths": [
+      "~/.ApacheDirectoryStudio"
+    ],
+    "fixes": [
+      "~/.ApacheDirectoryStudio:~/.local/share/ApacheDirectoryStudio"
+    ]
+  },
+  {
+    "name": "ARandR",
+    "paths": [
+      "~/.screenlayout"
+    ],
+    "fixes": [
+      "~/.screenlayout:~/.config/ARandR"
+    ]
+  },
+  {
+    "name": "Arduino",
+    "paths": [
+      "~/.arduino15",
+      "~/.jssc"
+    ],
+    "fixes": [
+      "~/.arduino15:~/.local/share/arduino15",
+      "~/.jssc:~/.local/share/jssc"
+    ]
+  },
+  {
+    "name": "arduino-cli",
+    "paths": [
+      "~/.arduino15/"
+    ],
+    "fixes": [
+      "~/.arduino15:~/.local/share/arduino15"
+    ]
+  },
+  {
+    "name": "Avidemux",
+    "paths": [
+      "~/.avidemux6"
+    ],
+    "fixes": [
+      "~/.avidemux6:~/.local/share/avidemux6"
+    ]
+  },
+  {
+    "name": "Berkshelf",
+    "paths": [
+      "~/.berkshelf/"
+    ],
+    "fixes": [
+      "~/.berkshelf:~/.local/share/berkshelf"
+    ]
+  },
+  {
+    "name": "chatty",
+    "paths": [
+      "~/.chatty/"
+    ],
+    "fixes": [
+      "~/.chatty:~/.local/share/chatty"
+    ]
+  },
+  {
+    "name": "cmake",
+    "paths": [
+      "~/.cmake/"
+    ],
+    "fixes": [
+      "~/.cmake:~/.local/share/cmake"
+    ]
+  },
+  {
+    "name": "Cinnamon",
+    "paths": [
+      "~/.cinnamon/"
+    ],
+    "fixes": [
+      "~/.cinnamon:~/.local/share/cinnamon"
+    ]
+  },
+  {
+    "name": "conan",
+    "paths": [
+      "~/.conan/"
+    ],
+    "fixes": [
+      "~/.conan:~/.local/share/conan"
+    ]
+  },
+  {
+    "name": "cryptomator",
+    "paths": [
+      "~/.Cryptomator"
+    ],
+    "fixes": [
+      "~/.Cryptomator:~/.local/share/Cryptomator"
+    ]
+  },
+  {
+    "name": "ctags (universial-ctags)",
+    "paths": [
+      "~/.ctagsrc",
+      "~/.ctags.d"
+    ],
+    "fixes": [
+      "~/.ctagsrc:~/.config/ctags/ctagsrc",
+      "~/.ctags.d:~/.config/ctags"
+    ]
+  },
+  {
+    "name": "CUPS",
+    "paths": [
+      "~/.cups/"
+    ],
+    "fixes": [
+      "~/.cups:~/.local/share/cups"
+    ]
+  },
+  {
+    "name": "cVim",
+    "paths": [
+      "~/.cvimrc"
+    ],
+    "fixes": [
+      "~/.cvimrc:~/.config/cVim/cvimrc"
+    ]
+  },
+  {
+    "name": "darcs",
+    "paths": [
+      "~/.darcs/"
+    ],
+    "fixes": [
+      "~/.darcs:~/.local/share/darcs"
+    ]
+  },
+  {
+    "name": "dart",
+    "paths": [
+      "~/.dart",
+      "~/.dartServer"
+    ],
+    "fixes": [
+      "~/.dart:~/.local/share/dart",
+      "~/.dartServer:~/.local/share/dartServer"
+    ]
+  },
+  {
+    "name": "devede",
+    "paths": [
+      "~/.devedeng"
+    ],
+    "fixes": [
+      "~/.devedeng:~/.local/share/devedeng"
+    ]
+  },
+  {
+    "name": "Dia",
+    "paths": [
+      "~/.dia/"
+    ],
+    "fixes": [
+      "~/.dia:~/.local/share/dia"
+    ]
+  },
+  {
+    "name": "dotnet-sdk",
+    "paths": [
+      "~/.dotnet/"
+    ],
+    "fixes": [
+      "~/.dotnet:~/.local/share/dotnet"
+    ]
+  },
+  {
+    "name": "dropbox",
+    "paths": [
+      "~/.dropbox/"
+    ],
+    "fixes": [
+      "~/.dropbox:~/.local/share/dropbox"
+    ]
+  },
+  {
+    "name": "Eclipse",
+    "paths": [
+      "~/.eclipse/"
+    ],
+    "fixes": [
+      "~/.eclipse:~/.local/share/eclipse"
+    ]
+  },
+  {
+    "name": "Fetchmail",
+    "paths": [
+      "~/.fetchmailrc"
+    ],
+    "fixes": [
+      "~/.fetchmailrc:~/.config/fetchmailrc"
+    ]
+  },
+  {
+    "name": "Flatpak",
+    "paths": [
+      "~/.var/"
+    ],
+    "fixes": [
+      "~/.var:~/.local/share/var"
+    ]
+  },
+  {
+    "name": "freesweep",
+    "paths": [
+      "~/.sweeprc"
+    ],
+    "fixes": [
+      "~/.sweeprc:~/.config/freesweep/sweeprc"
+    ]
+  },
+  {
+    "name": "gftp",
+    "paths": [
+      "~/.gftp/"
+    ],
+    "fixes": [
+      "~/.gftp:~/.local/share/gftp"
+    ]
+  },
+  {
+    "name": "gitkraken",
+    "paths": [
+      "~/.gitkraken/"
+    ],
+    "fixes": [
+      "~/.gitkraken:~/.local/share/gitkraken"
+    ]
+  },
+  {
+    "name": "GoldenDict",
+    "paths": [
+      "~/.goldendict/"
+    ],
+    "fixes": [
+      "~/.goldendict:~/.local/share/goldendict"
+    ]
+  },
+  {
+    "name": "gphoto2",
+    "paths": [
+      "~/.gphoto"
+    ],
+    "fixes": [
+      "~/.gphoto:~/.local/share/gphoto"
+    ]
+  },
+  {
+    "name": "gramps",
+    "paths": [
+      "~/.gramps/"
+    ],
+    "fixes": [
+      "~/.gramps:~/.local/share/gramps"
+    ]
+  },
+  {
+    "name": "groovy",
+    "paths": [
+      "~/.groovy/"
+    ],
+    "fixes": [
+      "~/.groovy:~/.local/share/groovy"
+    ]
+  },
+  {
+    "name": "grsync",
+    "paths": [
+      "~/.grsync/"
+    ],
+    "fixes": [
+      "~/.grsync:~/.local/share/grsync"
+    ]
+  },
+  {
+    "name": "google-cloud-cli",
+    "paths": [
+      "~/.gsutil/"
+    ],
+    "fixes": [
+      "~/.gsutil:~/.local/share/gsutil"
+    ]
+  },
+  {
+    "name": "gtk-recordMyDesktop",
+    "paths": [
+      "~/.gtk-recordmydesktop"
+    ],
+    "fixes": [
+      "~/.gtk-recordmydesktop:~/.config/gtk-recordMyDesktop/gtk-recordmydesktop"
+    ]
+  },
+  {
+    "name": "hplip",
+    "paths": [
+      "~/.hplip/"
+    ],
+    "fixes": [
+      "~/.hplip:~/.local/share/hplip"
+    ]
+  },
+  {
+    "name": "hydrogen",
+    "paths": [
+      "~/.hydrogen/"
+    ],
+    "fixes": [
+      "~/.hydrogen:~/.local/share/hydrogen"
+    ]
+  },
+  {
+    "name": "idris",
+    "paths": [
+      "~/.idris"
+    ],
+    "fixes": [
+      "~/.idris:~/.local/share/idris"
+    ]
+  },
+  {
+    "name": "itch-setup-bin",
+    "paths": [
+      "~/.itch"
+    ],
+    "fixes": [
+      "~/.itch:~/.local/share/itch"
+    ]
+  },
+  {
+    "name": "Jmol",
+    "paths": [
+      "~/.jmol/"
+    ],
+    "fixes": [
+      "~/.jmol:~/.local/share/jmol"
+    ]
+  },
+  {
+    "name": "lbdb",
+    "paths": [
+      "~/.lbdbrc",
+      "~/.lbdb/"
+    ],
+    "fixes": [
+      "~/.lbdbrc:~/.config/lbdb/lbdbrc",
+      "~/.lbdb:~/.local/share/lbdb"
+    ]
+  },
+  {
+    "name": "Java OpenJDK",
+    "paths": [
+      "~/.java/fonts"
+    ],
+    "fixes": [
+      "~/.java/fonts:~/.local/share/java/fonts"
+    ]
+  },
+  {
+    "name": "Java OpenJFX",
+    "paths": [
+      "~/.java/webview"
+    ],
+    "fixes": [
+      "~/.java/webview:~/.local/share/java/webview"
+    ]
+  },
+  {
+    "name": "jgmenu",
+    "paths": [
+      "~/.jgmenu-lockfile"
+    ],
+    "fixes": [
+      "~/.jgmenu-lockfile:~/.config/jgmenu/jgmenu-lockfile"
+    ]
+  },
+  {
+    "name": "julia",
+    "paths": [
+      "~/.juliarc.jl",
+      "~/.julia_history",
+      "~/.julia"
+    ],
+    "fixes": [
+      "~/.juliarc.jl:~/.config/julia/juliarc.jl",
+      "~/.julia_history:~/.local/share/julia/julia_history",
+      "~/.julia:~/.local/share/julia"
+    ]
+  },
+  {
+    "name": "kite",
+    "paths": [
+      "~/.kite/"
+    ],
+    "fixes": [
+      "~/.kite:~/.local/share/kite"
+    ]
+  },
+  {
+    "name": "kotlin",
+    "paths": [
+      "~/.kotlinc_history"
+    ],
+    "fixes": [
+      "~/.kotlinc_history:~/.local/share/kotlinc/kotlinc_history"
+    ]
+  },
+  {
+    "name": "Kubernetes",
+    "paths": [
+      "~/.kube/"
+    ],
+    "fixes": [
+      "~/.kube:~/.local/share/kube"
+    ]
+  },
+  {
+    "name": "lldb",
+    "paths": [
+      "~/.lldb",
+      "~/.lldbinit"
+    ],
+    "fixes": [
+      "~/.lldb:~/.local/share/lldb",
+      "~/.lldbinit:~/.config/lldb/lldbinit"
+    ]
+  },
+  {
+    "name": "LMMS",
+    "paths": [
+      "~/.lmmsrc.xml"
+    ],
+    "fixes": [
+      "~/.lmmsrc.xml:~/.config/lmms/lmmsrc.xml"
+    ]
+  },
+  {
+    "name": "mathomatic",
+    "paths": [
+      "~/.mathomaticrc",
+      "~/.matho_history"
+    ],
+    "fixes": [
+      "~/.mathomaticrc:~/.config/mathomatic/mathomaticrc",
+      "~/.matho_history:~/.local/share/mathomatic/matho_history"
+    ]
+  },
+  {
+    "name": "Minecraft",
+    "paths": [
+      "~/.minecraft/"
+    ],
+    "fixes": [
+      "~/.minecraft:~/.local/share/minecraft"
+    ]
+  },
+  {
+    "name": "Minetest",
+    "paths": [
+      "~/.minetest/"
+    ],
+    "fixes": [
+      "~/.minetest:~/.local/share/minetest"
+    ]
+  },
+  {
+    "name": "minicom",
+    "paths": [
+      "~/.minirc.dfl"
+    ],
+    "fixes": [
+      "~/.minirc.dfl:~/.config/minicom/minirc.dfl"
+    ]
+  },
+  {
+    "name": "Mono",
+    "paths": [
+      "~/.mono/"
+    ],
+    "fixes": [
+      "~/.mono:~/.local/share/mono"
+    ]
+  },
+  {
+    "name": "mongodb",
+    "paths": [
+      "~/.mongorc.js",
+      "~/.dbshell"
+    ],
+    "fixes": [
+      "~/.mongorc.js:~/.config/mongodb/mongorc.js",
+      "~/.dbshell:~/.config/mongodb/dbshell"
+    ]
+  },
+  {
+    "name": "",
+    "paths": [
+      "~/.netrc"
+    ],
+    "fixes": [
+      "~/.netrc:~/.config/netrc"
+    ]
+  },
+  {
+    "name": "nmcli",
+    "paths": [
+      "~/.nmcli-history"
+    ],
+    "fixes": [
+      "~/.nmcli-history:~/.local/share/nmcli/nmcli-history"
+    ]
+  },
+  {
+    "name": "Networkmanager-openvpn",
+    "paths": [
+      "~/.cert/nm-openvpn"
+    ],
+    "fixes": [
+      "~/.cert/nm-openvpn:~/.local/share/cert/nm-openvpn"
+    ]
+  },
+  {
+    "name": "ocaml-utop",
+    "paths": [
+      "~/.utop-history"
+    ],
+    "fixes": [
+      "~/.utop-history:~/.local/share/utop/utop-history"
+    ]
+  },
+  {
+    "name": "parsec-bin",
+    "paths": [
+      "~/.parsec"
+    ],
+    "fixes": [
+      "~/.parsec:~/.local/share/parsec"
+    ]
+  },
+  {
+    "name": "pcsxr",
+    "paths": [
+      "~/.pcsxr"
+    ],
+    "fixes": [
+      "~/.pcsxr:~/.local/share/pcsxr"
+    ]
+  },
+  {
+    "name": "perf",
+    "paths": [
+      "~/.debug"
+    ],
+    "fixes": [
+      "~/.debug:~/.local/share/debug"
+    ]
+  },
+  {
+    "name": "perl",
+    "paths": [
+      "~/.cpan",
+      "~/perl5"
+    ],
+    "fixes": [
+      "~/.cpan:~/.local/share/cpan",
+      "~/perl5:~/.local/share/perl5"
+    ]
+  },
+  {
+    "name": "phoronix-test-suite",
+    "paths": [
+      "~/.phoronix-test-suite"
+    ],
+    "fixes": [
+      "~/.phoronix-test-suite:~/.local/share/phoronix-test-suite"
+    ]
+  },
+  {
+    "name": "portfolio-performance-bin",
+    "paths": [
+      "~/.PortfolioPerformance/"
+    ],
+    "fixes": [
+      "~/.PortfolioPerformance:~/.local/share/PortfolioPerformance"
+    ]
+  },
+  {
+    "name": "psensor",
+    "paths": [
+      "~/.psensor"
+    ],
+    "fixes": [
+      "~/.psensor:~/.local/share/psensor"
+    ]
+  },
+  {
+    "name": "python",
+    "paths": [
+      "~/.python_history"
+    ],
+    "fixes": [
+      "~/.python_history:~/.local/share/python/python_history"
+    ]
+  },
+  {
+    "name": "python-tensorflow",
+    "paths": [
+      "~/.keras"
+    ],
+    "fixes": [
+      "~/.keras:~/.local/share/keras"
+    ]
+  },
+  {
+    "name": "qmmp",
+    "paths": [
+      "~/.qmmp"
+    ],
+    "fixes": [
+      "~/.qmmp:~/.local/share/qmmp"
+    ]
+  },
+  {
+    "name": "Qt Designer",
+    "paths": [
+      "~/.designer"
+    ],
+    "fixes": [
+      "~/.designer:~/.local/share/designer"
+    ]
+  },
+  {
+    "name": "RedNotebook",
+    "paths": [
+      "~/.rednotebook"
+    ],
+    "fixes": [
+      "~/.rednotebook:~/.local/share/rednotebook"
+    ]
+  },
+  {
+    "name": "Remarkable",
+    "paths": [
+      "~/.remarkable"
+    ],
+    "fixes": [
+      "~/.remarkable:~/.local/share/remarkable"
+    ]
+  },
+  {
+    "name": "renderdoc",
+    "paths": [
+      "~/.renderdoc"
+    ],
+    "fixes": [
+      "~/.renderdoc:~/.local/share/renderdoc"
+    ]
+  },
+  {
+    "name": "Ren'Py",
+    "paths": [
+      "~/.renpy"
+    ],
+    "fixes": [
+      "~/.renpy:~/.local/share/renpy"
+    ]
+  },
+  {
+    "name": "repo",
+    "paths": [
+      "~/.repoconfig"
+    ],
+    "fixes": [
+      "~/.repoconfig:~/.config/repo/repoconfig"
+    ]
+  },
+  {
+    "name": "rpm",
+    "paths": [
+      "~/.rpmrc",
+      "~/.rpmmacros"
+    ],
+    "fixes": [
+      "~/.rpmrc:~/.config/rpm/rpmrc",
+      "~/.rpmmacros:~/.config/rpm/rpmmacros"
+    ]
+  },
+  {
+    "name": "SANE",
+    "paths": [
+      "~/.sane/"
+    ],
+    "fixes": [
+      "~/.sane:~/.local/share/sane"
+    ]
+  },
+  {
+    "name": "sbcl",
+    "paths": [
+      "~/.sbclrc"
+    ],
+    "fixes": [
+      "~/.sbclrc:~/.config/sbcl/sbclrc"
+    ]
+  },
+  {
+    "name": "Solfege",
+    "paths": [
+      "~/.solfege",
+      "~/.solfegerc",
+      "~/lessonfiles"
+    ],
+    "fixes": [
+      "~/.solfege:~/.local/share/solfege",
+      "~/.solfegerc:~/.config/solfege/solfegerc",
+      "~/lessonfiles:~/.local/share/solfege/lessonfiles"
+    ]
+  },
+  {
+    "name": "SpamAssassin",
+    "paths": [
+      "~/.spamassassin"
+    ],
+    "fixes": [
+      "~/.spamassassin:~/.local/share/spamassassin"
+    ]
+  },
+  {
+    "name": "SQLite",
+    "paths": [
+      "~/.sqlite_history",
+      "~/.sqliterc"
+    ],
+    "fixes": [
+      "~/.sqlite_history:~/.local/share/sqlite/sqlite_history",
+      "~/.sqliterc:~/.config/sqlite/sqliterc"
+    ]
+  },
+  {
+    "name": "python-streamlit",
+    "paths": [
+      "~/.streamlit"
+    ],
+    "fixes": [
+      "~/.streamlit:~/.local/share/streamlit"
+    ]
+  },
+  {
+    "name": "TeamSpeak",
+    "paths": [
+      "~/.ts3client"
+    ],
+    "fixes": [
+      "~/.ts3client:~/.local/share/ts3client"
+    ]
+  },
+  {
+    "name": "terraform",
+    "paths": [
+      "~/.terraform.d/"
+    ],
+    "fixes": [
+      "~/.terraform.d:~/.local/share/terraform"
+    ]
+  },
+  {
+    "name": "texinfo",
+    "paths": [
+      "~/.infokey"
+    ],
+    "fixes": [
+      "~/.infokey:~/.config/info/infokey"
+    ]
+  },
+  {
+    "name": "Thunderbird",
+    "paths": [
+      "~/.thunderbird/"
+    ],
+    "fixes": [
+      "~/.thunderbird:~/.local/share/thunderbird"
+    ]
+  },
+  {
+    "name": "TigerVNC",
+    "paths": [
+      "~/.vnc"
+    ],
+    "fixes": [
+      "~/.vnc:~/.local/share/vnc"
+    ]
+  },
+  {
+    "name": "tllocalmgr",
+    "paths": [
+      "~/.texlive"
+    ],
+    "fixes": [
+      "~/.texlive:~/.local/share/texlive"
+    ]
+  },
+  {
+    "name": "urlview",
+    "paths": [
+      "~/.urlview"
+    ],
+    "fixes": [
+      "~/.urlview:~/.config/urlview/urlview"
+    ]
+  },
+  {
+    "name": "vale",
+    "paths": [
+      "~/.vale.ini"
+    ],
+    "fixes": [
+      "~/.vale.ini:~/.config/vale/vale.ini"
+    ]
+  },
+  {
+    "name": "vim",
+    "paths": [
+      "~/.vim",
+      "~/.vimrc",
+      "~/.viminfo"
+    ],
+    "fixes": [
+      "~/.vim:~/.local/share/vim",
+      "~/.vimrc:~/.config/vim/vimrc",
+      "~/.viminfo:~/.local/share/vim/viminfo"
+    ]
+  },
+  {
+    "name": "vimperator",
+    "paths": [
+      "~/.vimperatorrc"
+    ],
+    "fixes": [
+      "~/.vimperatorrc:~/.config/vimperator/vimperatorrc"
+    ]
+  },
+  {
+    "name": "visidata",
+    "paths": [
+      "~/.visidata"
+    ],
+    "fixes": [
+      "~/.visidata:~/.config/visidata/visidata"
+    ]
+  },
+  {
+    "name": "wpa_cli",
+    "paths": [
+      "~/.wpa_cli_history"
+    ],
+    "fixes": [
+      "~/.wpa_cli_history:~/.local/share/wpa_cli/wpa_cli_history"
+    ]
+  },
+  {
+    "name": "wego",
+    "paths": [
+      "~/.wegorc"
+    ],
+    "fixes": [
+      "~/.wegorc:~/.config/wego/wegorc"
+    ]
+  },
+  {
+    "name": "x2goclient",
+    "paths": [
+      "~/.x2goclient"
+    ],
+    "fixes": [
+      "~/.x2goclient:~/.local/share/x2goclient"
+    ]
+  },
+  {
+    "name": "xpdf",
+    "paths": [
+      "~/.xpdfrc"
+    ],
+    "fixes": [
+      "~/.xpdfrc:~/.config/xpdf/xpdfrc"
+    ]
+  },
+  {
+    "name": "xrdp",
+    "paths": [
+      "~/thinclient_drives"
+    ],
+    "fixes": [
+      "~/thinclient_drives:~/.local/share/xrdp/thinclient_drives"
+    ]
+  },
+  {
+    "name": "XVim2",
+    "paths": [
+      "~/.xvimrc"
+    ],
+    "fixes": [
+      "~/.xvimrc:~/.config/xvim/xvimrc"
+    ]
+  },
+  {
+    "name": "YARD",
+    "paths": [
+      "~/.yard"
+    ],
+    "fixes": [
+      "~/.yard:~/.config/yard/yard"
+    ]
+  },
+  {
+    "name": "zenmap nmap",
+    "paths": [
+      "~/.zenmap"
+    ],
+    "fixes": [
+      "~/.zenmap:~/.local/share/zenmap"
+    ]
+  },
+  {
+    "name": "zotero-bin",
+    "paths": [
+      "~/.zotero",
+      "~/Zotero"
+    ],
+    "fixes": [
+      "~/.zotero:~/.local/share/zotero",
+      "~/Zotero:~/.local/share/zotero"
+    ]
+  }
+]

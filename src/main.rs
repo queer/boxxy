@@ -9,9 +9,11 @@ use config::{Config, FileFormat};
 use log::*;
 use which::which;
 
-use crate::enclosure::rule::BoxxyConfig;
+use crate::enclosure::rule::{BoxxyConfig, Rule, RuleMode};
+use crate::scanner::Scanner;
 
 pub mod enclosure;
+pub mod scanner;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -22,6 +24,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
     about = "Put bad programs in a box with only their files.",
     long_about = "boxxy forces bad programs to put their files somewhere else via Linux user namespaces.",
     version = VERSION,
+    subcommand_negates_reqs = true,
 )]
 pub struct Args {
     #[arg(
@@ -59,13 +62,21 @@ pub struct Args {
 }
 
 #[derive(Subcommand)]
-#[command(
-    name = "config",
-    about = "View the config file.",
-    subcommand_negates_reqs = true
-)]
 pub enum BoxxySubcommand {
+    #[command(
+        name = "config",
+        about = "View the config file.",
+        subcommand_negates_reqs = true,
+        aliases = &["cfg", "conf", "c"]
+    )]
     Config,
+    #[command(
+        name = "scan",
+        about = "Scan your homedir for applications that may benefit from boxxy.",
+        subcommand_negates_reqs = true,
+        aliases = &["s"]
+    )]
+    Scan,
 }
 
 fn main() -> Result<()> {
@@ -74,12 +85,67 @@ fn main() -> Result<()> {
     let self_exe = std::env::args().next().unwrap();
     setup_logging(&cfg, &self_exe)?;
 
-    if let Some(BoxxySubcommand::Config) = cfg.command {
-        let config_path = config_file_path(&self_exe)?;
-        let mut printer = bat::PrettyPrinter::new();
-        printer.input_file(config_path).print()?;
+    if let Some(cmd) = cfg.command {
+        match cmd {
+            BoxxySubcommand::Config => {
+                let config_path = config_file_path(&self_exe)?;
+                let mut printer = bat::PrettyPrinter::new();
+                printer.input_file(config_path).print()?;
 
-        return Ok(());
+                return Ok(());
+            }
+            BoxxySubcommand::Scan => {
+                let apps = Scanner::new().scan()?;
+                if !apps.is_empty() {
+                    info!(
+                        "found {} applications that might be boxxable! generating config...",
+                        apps.len()
+                    );
+                    let mut rules = vec![];
+                    for app in apps {
+                        for fix in app.fixes {
+                            let (old, new) = fix.split_once(':').unwrap();
+                            let path = PathBuf::from(old);
+                            let mode = if path.is_dir() {
+                                RuleMode::Directory
+                            } else {
+                                RuleMode::File
+                            };
+                            rules.push(Rule {
+                                name: app.name.clone(),
+                                target: old.into(),
+                                rewrite: new.into(),
+                                mode,
+                                context: vec![],
+                                only: vec![],
+                            });
+                        }
+                    }
+                    let config = BoxxyConfig {
+                        rules: rules.clone(),
+                    };
+                    let config = &serde_yaml::to_string(&config)?;
+                    let mut printer = bat::PrettyPrinter::new();
+                    println!();
+                    printer
+                        .input_from_bytes(config.as_bytes())
+                        .language("yaml")
+                        .print()
+                        .expect("failed to print config");
+                    println!();
+                    warn!("!!! BE CAREFUL WITH THIS CONFIG !!!");
+                    warn!("SAFETY IS NOT GUARANTEED!!!");
+                    warn!("this config was automatically generated and may not be correct.");
+                    warn!("please review the config before using it!");
+                    info!("rules generated: {}", rules.len());
+                    info!(
+                        "put relevant rules in your config file: {}",
+                        config_file_path(&self_exe)?.display()
+                    );
+                }
+                return Ok(());
+            }
+        }
     }
 
     // Load rules

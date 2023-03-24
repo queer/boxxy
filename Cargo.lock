@@ -125,7 +125,7 @@ dependencies = [
  "path_abs",
  "semver",
  "serde",
- "serde_yaml",
+ "serde_yaml 0.8.26",
  "syntect",
  "thiserror",
  "unicode-width",
@@ -163,7 +163,7 @@ dependencies = [
 
 [[package]]
 name = "boxxy"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "atty",
  "bat",
@@ -183,6 +183,8 @@ dependencies = [
  "regex",
  "rlimit",
  "serde",
+ "serde_json",
+ "serde_yaml 0.9.19",
  "shellexpand",
  "strum",
  "syscall-numbers",
@@ -1213,9 +1215,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.92"
+version = "1.0.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7434af0dc1cbd59268aa98b4c22c131c0584d2232f6fb166efb993e2832e896a"
+checksum = "1c533a59c9d8a93a09c6ab31f0fd5e5f4dd1b8fc9434804029839884765d04ea"
 dependencies = [
  "itoa",
  "ryu",
@@ -1232,6 +1234,19 @@ dependencies = [
  "ryu",
  "serde",
  "yaml-rust",
+]
+
+[[package]]
+name = "serde_yaml"
+version = "0.9.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f82e6c8c047aa50a7328632d067bcae6ef38772a79e28daf32f735e0e4f3dd10"
+dependencies = [
+ "indexmap",
+ "itoa",
+ "ryu",
+ "serde",
+ "unsafe-libyaml",
 ]
 
 [[package]]
@@ -1505,6 +1520,12 @@ name = "unicode-width"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b"
+
+[[package]]
+name = "unsafe-libyaml"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad2024452afd3874bf539695e04af6732ba06517424dbf958fdb16a01f3bef6c"
 
 [[package]]
 name = "url"

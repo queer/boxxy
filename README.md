@@ -33,6 +33,8 @@ force it to puts its data somewhere nice and proper.
 - minimal overhead
 - opt-in immutable fs outside of rule rewrites, ie only the files/directories
   you specify in rules are writable
+- as of `0.5.0`, boxxy can scan your homedir to automatically suggest rules for
+  you! ![image of boxxy scan](https://cdn.mewna.xyz/2023/03/25/G6hrd3iQjEy65.png)
 
 ### potential drawbacks
 
