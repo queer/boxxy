@@ -76,6 +76,7 @@ git:(mistress) | ▶
 - use contexts to keep project configs separate on disk
 - dotfiles!
 - stop using symlinks!!!
+- no more dev config files when writing code
 
 ## configuration
 
