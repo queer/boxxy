@@ -1,11 +1,11 @@
 use std::collections::HashMap;
-use std::fs;
 use std::path::PathBuf;
 
 use color_eyre::Result;
 use nix::unistd::Pid;
 
-use super::tracer::{ChildProcess, PtraceRegisters, StringRegister, Tracer};
+use crate::enclosure::register::StringRegister;
+use crate::enclosure::tracer::{ChildProcess, PtraceRegisters, Tracer};
 
 lazy_static::lazy_static! {
     static ref SYSCALL_REGISTERS: HashMap<i64, StringRegister> = {
@@ -221,7 +221,7 @@ fn get_path_from_syscall(
         };
         let path = match child.read_string(register, path_ptr as *mut _) {
             Ok(path) => PathBuf::from(path),
-            Err(_) => match get_fd_path(child.pid(), path_ptr as i32) {
+            Err(_) => match super::get_fd_path(child.pid(), path_ptr as i32) {
                 Ok(Some(path)) => path,
                 Ok(None) => return Ok(None),
                 Err(_) => return Ok(None),
@@ -231,20 +231,5 @@ fn get_path_from_syscall(
         Ok(Some(path))
     } else {
         Ok(None)
-    }
-}
-
-#[allow(unused)]
-fn get_fd_path(pid: Pid, fd: i32) -> Result<Option<PathBuf>> {
-    let fd_path = format!("/proc/{pid}/fd/{fd}");
-    match fs::read_link(fd_path) {
-        Ok(path) => {
-            if path.starts_with("pipe:[") {
-                Ok(None)
-            } else {
-                Ok(Some(path))
-            }
-        }
-        Err(_) => Ok(None),
     }
 }
