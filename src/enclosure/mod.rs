@@ -27,6 +27,7 @@ use self::rule::{BoxxyConfig, RuleMode};
 
 pub mod fs;
 mod linux;
+mod register;
 pub mod rule;
 mod syscall;
 mod tracer;

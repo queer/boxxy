@@ -10,6 +10,7 @@ use nix::sys::signal::Signal;
 use nix::sys::wait::{waitpid, WaitStatus};
 use nix::unistd::Pid;
 
+use super::register::{syscall_number_from_user_regs, StringRegister};
 use super::syscall::Syscall;
 
 pub struct Tracer {
@@ -228,7 +229,7 @@ impl Tracer {
         let regs = child.get_registers()?;
         trace!(
             "child {pid} exited syscall {:?}",
-            syscall_numbers::native::sys_call_name(regs.orig_rax as i64)
+            syscall_numbers::native::sys_call_name(syscall_number_from_user_regs!(regs) as i64)
         );
         Ok(())
     }
@@ -324,15 +325,4 @@ pub enum ChildProcessState {
     EnteringSyscall,
     ExitingSyscall,
     PtraceEvent,
-}
-
-#[allow(unused)]
-#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
-pub enum StringRegister {
-    Rdi,
-    Rsi,
-    Rdx,
-    Rcx,
-    R8,
-    R9,
 }
