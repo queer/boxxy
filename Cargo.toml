@@ -8,7 +8,7 @@ repository = "https://github.com/queer/boxxy"
 
 [dependencies]
 atty = "0.2.14"
-bat = { version = "0.22.1", default-features = false, features = ["atty", "regex-onig"] }
+bat = { version = "0.23.0", default-features = false, features = ["atty", "regex-onig"] }
 byteorder = "1.4.3"
 cfg-if = "1.0.0"
 clap = { version = "4.1.11", features = ["derive"] }
