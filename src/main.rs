@@ -7,6 +7,7 @@ use clap::{Parser, Subcommand};
 use color_eyre::Result;
 use config::{Config, FileFormat};
 use log::*;
+use scanner::App;
 use which::which;
 
 use crate::enclosure::rule::{BoxxyConfig, Rule, RuleMode};
@@ -34,6 +35,7 @@ pub struct Args {
         help = "Make the root filesystem immutable."
     )]
     pub immutable_root: bool,
+
     #[arg(
         trailing_var_arg = true,
         name = "COMMAND TO RUN",
@@ -41,14 +43,17 @@ pub struct Args {
         help = "The command to run, ex. `ls -lah` or `aws configure`."
     )]
     pub command_with_args: Vec<String>,
+
     #[arg(short = 'l', long = "log-level", default_value = "info")]
     pub log_level: String,
+
     #[arg(
         long = "force-colour",
         default_value = "false",
         help = "Force colour output even when stdout is not a tty."
     )]
     pub force_colour: bool,
+
     #[arg(
         short = 't',
         long = "trace",
@@ -96,55 +101,7 @@ fn main() -> Result<()> {
             }
             BoxxySubcommand::Scan => {
                 let apps = Scanner::new().scan()?;
-                if !apps.is_empty() {
-                    info!(
-                        "found {} applications that might be boxxable! generating config...",
-                        apps.len()
-                    );
-                    let mut rules = vec![];
-                    for app in apps {
-                        for fix in app.fixes {
-                            let (old, new) = fix.split_once(':').unwrap();
-                            let path = PathBuf::from(old);
-                            let mode = if path.is_dir() {
-                                RuleMode::Directory
-                            } else {
-                                RuleMode::File
-                            };
-                            rules.push(Rule {
-                                name: app.name.clone(),
-                                target: old.into(),
-                                rewrite: new.into(),
-                                mode,
-                                context: vec![],
-                                only: vec![],
-                            });
-                        }
-                    }
-                    let config = BoxxyConfig {
-                        rules: rules.clone(),
-                    };
-                    let config = &serde_yaml::to_string(&config)?;
-                    let mut printer = bat::PrettyPrinter::new();
-                    println!();
-                    printer
-                        .input_from_bytes(config.as_bytes())
-                        .language("yaml")
-                        .print()
-                        .expect("failed to print config");
-                    println!();
-                    warn!("!!! BE CAREFUL WITH THIS CONFIG !!!");
-                    warn!("SAFETY IS NOT GUARANTEED!!!");
-                    warn!("this config was automatically generated and may not be correct.");
-                    warn!("please review the config before using it!");
-                    warn!("report bad rules!! https://github.com/queer/boxxy/issues/new");
-                    info!("rules generated: {}", rules.len());
-                    info!(
-                        "put relevant rules in your config file: {}",
-                        config_file_path(&self_exe)?.display()
-                    );
-                }
-                return Ok(());
+                return scan_homedir(&self_exe, apps);
             }
         }
     }
@@ -264,4 +221,57 @@ example rule:
     };
 
     Ok(rules)
+}
+
+fn scan_homedir(self_exe: &str, apps: Vec<App>) -> Result<()> {
+    if !apps.is_empty() {
+        info!(
+            "found {} applications that might be boxxable! generating config...",
+            apps.len()
+        );
+        let mut rules = vec![];
+        for app in apps {
+            for fix in app.fixes {
+                let (old, new) = fix.split_once(':').unwrap();
+                let path = PathBuf::from(old);
+                let mode = if path.is_dir() {
+                    RuleMode::Directory
+                } else {
+                    RuleMode::File
+                };
+                rules.push(Rule {
+                    name: app.name.clone(),
+                    target: old.into(),
+                    rewrite: new.into(),
+                    mode,
+                    context: vec![],
+                    only: vec![],
+                });
+            }
+        }
+        let config = BoxxyConfig {
+            rules: rules.clone(),
+        };
+        let config = &serde_yaml::to_string(&config)?;
+        let mut printer = bat::PrettyPrinter::new();
+        println!();
+        printer
+            .input_from_bytes(config.as_bytes())
+            .language("yaml")
+            .print()
+            .expect("failed to print config");
+        println!();
+        warn!("!!! BE CAREFUL WITH THIS CONFIG !!!");
+        warn!("SAFETY IS NOT GUARANTEED!!!");
+        warn!("this config was automatically generated and may not be correct.");
+        warn!("please review the config before using it!");
+        warn!("report bad rules!! https://github.com/queer/boxxy/issues/new");
+        info!("rules generated: {}", rules.len());
+        info!(
+            "put relevant rules in your config file: {}",
+            config_file_path(self_exe)?.display()
+        );
+    }
+
+    Ok(())
 }
