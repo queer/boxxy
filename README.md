@@ -128,6 +128,8 @@ rules:
   only: # optional
   - "binary name"
   - "binary name"
+  env: # optional
+    KEY: "value"
 ```
 
 ## developing
