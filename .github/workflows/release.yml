@@ -52,7 +52,6 @@ jobs:
           # (required) GitHub token for creating GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
 
-
   # Build and packages all the things
   upload-artifacts:
     needs: create-release
@@ -60,9 +59,12 @@ jobs:
       matrix:
         # For these target platforms
         include:
-        - target: x86_64-unknown-linux-gnu
-          os: ubuntu-20.04
-          install-dist: curl --proto '=https' --tlsv1.2 -L -sSf https://github.com/axodotdev/cargo-dist/releases/download/v0.0.2/installer.sh | sh
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-20.04
+            install-dist: curl --proto '=https' --tlsv1.2 -L -sSf https://github.com/axodotdev/cargo-dist/releases/download/v0.0.2/installer.sh | sh
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-20.04
+            install-dist: curl --proto '=https' --tlsv1.2 -L -sSf https://github.com/axodotdev/cargo-dist/releases/download/v0.0.2/installer.sh | sh
     runs-on: ${{ matrix.os }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
