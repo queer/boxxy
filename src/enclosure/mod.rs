@@ -3,7 +3,7 @@ use std::ffi::CString;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::{exit, Command};
+use std::process::exit;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
@@ -20,10 +20,11 @@ use owo_colors::colors::xterm::PinkSalmon;
 use owo_colors::OwoColorize;
 use rlimit::Resource;
 
+use crate::config::BoxxyConfig;
 use crate::enclosure::tracer::Tracer;
 
 use self::fs::{append_all, FsDriver};
-use self::rule::{BoxxyConfig, RuleMode};
+use self::rule::{Rule, RuleMode};
 
 pub mod fs;
 mod linux;
@@ -32,46 +33,37 @@ pub mod rule;
 mod syscall;
 mod tracer;
 
-pub struct Enclosure<'a> {
-    command: &'a mut Command,
+pub struct Enclosure {
+    config: BoxxyConfig,
     fs: FsDriver,
     name: String,
-    boxxy_config: BoxxyConfig,
-    immutable_root: bool,
     child_exit_status: i32,
     created_files: Vec<PathBuf>,
     created_directories: Vec<PathBuf>,
-    trace: bool,
 }
 
-pub struct Opts<'a> {
-    pub rules: BoxxyConfig,
-    pub command: &'a mut Command,
-    pub immutable_root: bool,
-    pub trace: bool,
-}
-
-impl<'a> Enclosure<'a> {
-    pub fn new(opts: Opts<'a>) -> Self {
+impl Enclosure {
+    pub fn new(config: BoxxyConfig) -> Self {
         Self {
-            command: opts.command,
+            config,
             fs: FsDriver::new(),
             name: Haikunator::default().haikunate(),
-            boxxy_config: opts.rules,
-            immutable_root: opts.immutable_root,
             child_exit_status: -1,
             created_files: vec![],
             created_directories: vec![],
-            trace: opts.trace,
         }
     }
 
     pub fn run(&mut self) -> Result<()> {
         // Prepare the filesystem
-        self.set_up_temporary_files()?;
+        let applicable_rules = &self
+            .config
+            .rules
+            .get_all_applicable_rules(self.config.command.get_program(), &self.fs)?;
+        self.set_up_temporary_files(applicable_rules)?;
 
         // Set up the container: callback, stack, etc.
-        let callback = || self.run_in_container().unwrap();
+        let callback = || self.run_in_container(applicable_rules).unwrap();
 
         let stack_size = match Resource::STACK.get() {
             Ok((soft, _hard)) => soft as usize,
@@ -151,7 +143,7 @@ impl<'a> Enclosure<'a> {
         })?;
 
         // Restart stopped child if not tracing
-        if self.trace {
+        if self.config.trace {
             self.run_with_tracing(pid)?;
         } else {
             ptrace::detach(pid, None)?;
@@ -232,25 +224,9 @@ impl<'a> Enclosure<'a> {
         exit(self.child_exit_status);
     }
 
-    fn set_up_temporary_files(&mut self) -> Result<Vec<PathBuf>> {
-        for rule in &self.boxxy_config.rules {
+    fn set_up_temporary_files(&mut self, applicable_rules: &[Rule]) -> Result<Vec<PathBuf>> {
+        for rule in applicable_rules {
             debug!("processing path creation for rule '{}'", rule.name);
-
-            if !rule.currently_in_context(&self.fs)? {
-                debug!(
-                    "not processing paths for rule '{}' because of context",
-                    rule.name
-                );
-                continue;
-            }
-
-            if !rule.applies_to_binary(self.command.get_program(), &self.fs)? {
-                debug!(
-                    "not processing paths for rule '{}' because of binary",
-                    rule.name
-                );
-                continue;
-            }
 
             let expanded_target = self.fs.fully_expand_path(&rule.target)?;
             let target_path = self.fs.maybe_resolve_symlink(&expanded_target)?;
@@ -281,7 +257,7 @@ impl<'a> Enclosure<'a> {
         Ok(vec![])
     }
 
-    fn set_up_container(&mut self) -> Result<()> {
+    fn set_up_container(&mut self, applicable_rules: &[Rule]) -> Result<()> {
         // Mount root RW
         debug!("setup root");
         self.fs.setup_root(&self.name)?;
@@ -290,9 +266,6 @@ impl<'a> Enclosure<'a> {
         self.fs.bind_mount_rw(Path::new("/"), &container_root)?;
 
         // Apply all rules via bind mounts
-        let applicable_rules = &self
-            .boxxy_config
-            .get_all_applicable_rules(self.command.get_program(), &self.fs)?;
         info!("applying {} rules", applicable_rules.len());
         for rule in applicable_rules {
             info!("applying rule '{}'", rule.name);
@@ -362,12 +335,12 @@ impl<'a> Enclosure<'a> {
         Ok(())
     }
 
-    fn run_in_container(&mut self) -> Result<isize> {
-        self.set_up_container()?;
+    fn run_in_container(&mut self, applicable_rules: &[Rule]) -> Result<isize> {
+        self.set_up_container(applicable_rules)?;
 
         let pwd = std::env::current_dir()?;
 
-        if self.trace {
+        if self.config.trace {
             chroot(&self.fs.container_root(&self.name))?;
             chdir(&pwd)?;
         } else {
@@ -378,7 +351,7 @@ impl<'a> Enclosure<'a> {
         }
 
         // Remount rootfs as ro
-        if self.immutable_root {
+        if self.config.immutable_root {
             debug!("remounting rootfs as ro!");
             self.fs.remount_ro(Path::new("/"))?;
         }
@@ -393,13 +366,13 @@ impl<'a> Enclosure<'a> {
         signal::kill(getpid(), signal::SIGSTOP)?;
 
         // Do the needful!
-        debug!("running command: {:?}", self.command.get_program());
+        debug!("running command: {:?}", self.config.command.get_program());
         info!(
             "{}",
-            format!("boxed {:?} ♥", self.command.get_program())
+            format!("boxed {:?} ♥", self.config.command.get_program())
                 .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
-        let result = self.command.spawn()?.wait()?;
+        let result = self.config.command.spawn()?.wait()?;
 
         debug!("command exited with status: {:?}", result);
 

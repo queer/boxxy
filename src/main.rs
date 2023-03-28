@@ -1,16 +1,16 @@
 use std::path::PathBuf;
-use std::process::Command;
 
 use atty::Stream;
 use clap::{Parser, Subcommand};
 use color_eyre::Result;
 use log::*;
 use scanner::App;
-use which::which;
 
-use crate::enclosure::rule::{BoxxyConfig, Rule, RuleMode};
+use crate::config::BoxxyConfig;
+use crate::enclosure::rule::{BoxxyRules, Rule, RuleMode};
 use crate::scanner::Scanner;
 
+pub mod config;
 pub mod enclosure;
 pub mod scanner;
 
@@ -60,6 +60,14 @@ pub struct Args {
     )]
     pub trace: bool,
 
+    #[arg(
+        short = 'd',
+        long = "dotenv",
+        default_value = "false",
+        help = "Load environment variables from the .env file in the current directory and apply them to the boxxed program."
+    )]
+    pub dotenv: bool,
+
     #[command(subcommand)]
     pub command: Option<BoxxySubcommand>,
 }
@@ -90,7 +98,7 @@ fn main() -> Result<()> {
     if let Some(cmd) = cfg.command {
         match cmd {
             BoxxySubcommand::Config => {
-                for config_path in BoxxyConfig::config_paths()? {
+                for config_path in BoxxyConfig::rule_paths()? {
                     let mut printer = bat::PrettyPrinter::new();
                     printer.input_file(config_path).print()?;
                 }
@@ -106,41 +114,16 @@ fn main() -> Result<()> {
     // Load rules
     let rules = {
         let mut rules = vec![];
-        for config in BoxxyConfig::config_paths()? {
+        for config in BoxxyConfig::rule_paths()? {
             info!("loading rules from {}", config.display());
-            rules.push(BoxxyConfig::load_from_path(&config)?);
+            rules.push(BoxxyConfig::load_rules_from_path(&config)?);
         }
         BoxxyConfig::merge(rules)
     };
     info!("loaded {} total rule(s)", rules.rules.len());
 
-    // Do the do!
-    let (cmd, args) = (&cfg.command_with_args[0], &cfg.command_with_args[1..]);
-
-    if which(cmd).is_err() {
-        error!("command not found in $PATH: {}", cmd);
-        debug!("searched $PATH: {}", std::env::var("PATH")?);
-        std::process::exit(1);
-    }
-
-    let mut command = Command::new(cmd);
-
-    // Pass through current env
-    command.envs(std::env::vars());
-
-    // Pass args
-    if !args.is_empty() {
-        command.args(args);
-    }
-
     // Do the thing!
-    enclosure::Enclosure::new(enclosure::Opts {
-        rules,
-        command: &mut command,
-        immutable_root: cfg.immutable_root,
-        trace: cfg.trace,
-    })
-    .run()?;
+    enclosure::Enclosure::new(BoxxyConfig::load_config(cfg)?).run()?;
 
     Ok(())
 }
@@ -202,7 +185,7 @@ fn scan_homedir(apps: Vec<App>) -> Result<()> {
                 });
             }
         }
-        let config = BoxxyConfig {
+        let config = BoxxyRules {
             rules: rules.clone(),
         };
         let config = &serde_yaml::to_string(&config)?;
