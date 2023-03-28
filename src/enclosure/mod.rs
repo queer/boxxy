@@ -259,8 +259,7 @@ impl Enclosure {
     }
 
     fn set_up_container(&mut self, applicable_rules: &[Rule]) -> Result<()> {
-        // Load env vars into self.config.command
-
+        // Load .env vars
         if self.config.dotenv {
             debug!("dotenv enabled!");
             if let Ok(dotenv_file) = dotenv::dotenv() {
@@ -273,6 +272,21 @@ impl Enclosure {
                     debug!("loaded env var: {}=********", key);
                 }
                 info!("loaded {} env vars", dotenv.len());
+            }
+        }
+
+        // Load env vars from applicable rules
+        for rule in applicable_rules {
+            for (key, value) in rule.env.iter() {
+                self.config.command.env(key, value);
+                debug!("loaded env var: {}=********", key);
+            }
+            if !rule.env.is_empty() {
+                info!(
+                    "loaded {} env vars from rule '{}'",
+                    rule.env.len(),
+                    rule.name
+                );
             }
         }
 

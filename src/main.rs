@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use atty::Stream;
@@ -182,6 +183,8 @@ fn scan_homedir(apps: Vec<App>) -> Result<()> {
                     mode,
                     context: vec![],
                     only: vec![],
+                    // TODO: populate for apps where possible
+                    env: HashMap::new(),
                 });
             }
         }

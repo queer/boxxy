@@ -1,1 +1,6 @@
-rules: []
+rules:
+  - name: "Inject env var"
+    target: "/tmp"
+    rewrite: "/tmp"
+    env:
+      KEY: "TEST VALUE"

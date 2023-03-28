@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
@@ -55,6 +56,11 @@ pub struct Rule {
     /// this is an empty list, then the rule applies to all binaries.
     #[serde(default = "empty_vec")]
     pub only: Vec<String>,
+    /// Environment variables that this rule applies if it matches. Any env
+    /// vars listed here will be injected into the environment of the command
+    /// that is being boxxed.
+    #[serde(default = "empty_hashmap")]
+    pub env: HashMap<String, String>,
 }
 
 impl Rule {
@@ -173,6 +179,10 @@ fn default_rule_mode() -> RuleMode {
 
 fn empty_vec<T>() -> Vec<T> {
     Vec::new()
+}
+
+fn empty_hashmap<K, V>() -> HashMap<K, V> {
+    HashMap::new()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
