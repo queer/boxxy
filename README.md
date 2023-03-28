@@ -35,6 +35,8 @@ force it to puts its data somewhere nice and proper.
   you specify in rules are writable
 - as of `0.5.0`, boxxy can scan your homedir to automatically suggest rules for
   you! ![image of boxxy scan](https://cdn.mewna.xyz/2023/03/25/G6hrd3iQjEy65.png)
+- as of `0.6.0`, boxxy can use project-local `boxxy.yaml` files, and can load
+  `.env` files for you! ![image of 0.6.0 features](https://cdn.mewna.xyz/2023/03/28/Jawp5It1xrnWN.png)
 
 ### potential drawbacks
 
