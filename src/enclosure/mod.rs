@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::ffi::CString;
-use std::fs::File;
+use std::fs::{read_to_string, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::exit;
@@ -9,6 +9,7 @@ use std::thread;
 use std::time::Duration;
 
 use color_eyre::Result;
+use dotenv_parser::parse_dotenv;
 use haikunator::Haikunator;
 use log::*;
 use nix::mount::{umount2, MntFlags};
@@ -258,6 +259,23 @@ impl Enclosure {
     }
 
     fn set_up_container(&mut self, applicable_rules: &[Rule]) -> Result<()> {
+        // Load env vars into self.config.command
+
+        if self.config.dotenv {
+            debug!("dotenv enabled!");
+            if let Ok(dotenv_file) = dotenv::dotenv() {
+                debug!("found dotenv path: {dotenv_file:?}");
+                info!("loading env vars from {}", dotenv_file.display());
+                // TODO: bleh error handling
+                let dotenv = parse_dotenv(&read_to_string(dotenv_file)?).unwrap();
+                for (key, value) in dotenv.iter() {
+                    self.config.command.env(key, value);
+                    debug!("loaded env var: {}=********", key);
+                }
+                info!("loaded {} env vars", dotenv.len());
+            }
+        }
+
         // Mount root RW
         debug!("setup root");
         self.fs.setup_root(&self.name)?;
