@@ -290,19 +290,11 @@ impl<'a> Enclosure<'a> {
         self.fs.bind_mount_rw(Path::new("/"), &container_root)?;
 
         // Apply all rules via bind mounts
-        for rule in &self.boxxy_config.rules {
-            debug!("processing rule '{}'", rule.name);
-
-            if !rule.currently_in_context(&self.fs)? {
-                debug!("not applying rule '{}' because of context", rule.name);
-                continue;
-            }
-
-            if !rule.applies_to_binary(self.command.get_program(), &self.fs)? {
-                debug!("not applying rule '{}' because of binary", rule.name);
-                continue;
-            }
-
+        let applicable_rules = &self
+            .boxxy_config
+            .get_all_applicable_rules(self.command.get_program(), &self.fs)?;
+        info!("applying {} rules", applicable_rules.len());
+        for rule in applicable_rules {
             info!("applying rule '{}'", rule.name);
 
             let expanded_target = self.fs.fully_expand_path(&rule.target)?;

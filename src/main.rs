@@ -1,11 +1,9 @@
-use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 
 use atty::Stream;
 use clap::{Parser, Subcommand};
 use color_eyre::Result;
-use config::{Config, FileFormat};
 use log::*;
 use scanner::App;
 use which::which;
@@ -87,28 +85,34 @@ pub enum BoxxySubcommand {
 fn main() -> Result<()> {
     // Fetch command to run
     let cfg = Args::parse();
-    let self_exe = std::env::args().next().unwrap();
-    setup_logging(&cfg, &self_exe)?;
+    setup_logging(&cfg)?;
 
     if let Some(cmd) = cfg.command {
         match cmd {
             BoxxySubcommand::Config => {
-                let config_path = config_file_path(&self_exe)?;
-                let mut printer = bat::PrettyPrinter::new();
-                printer.input_file(config_path).print()?;
-
+                for config_path in BoxxyConfig::config_paths()? {
+                    let mut printer = bat::PrettyPrinter::new();
+                    printer.input_file(config_path).print()?;
+                }
                 return Ok(());
             }
             BoxxySubcommand::Scan => {
                 let apps = Scanner::new().scan()?;
-                return scan_homedir(&self_exe, apps);
+                return scan_homedir(apps);
             }
         }
     }
 
     // Load rules
-    let rules = load_rules(&self_exe)?;
-    info!("loaded {} rule(s)", rules.rules.len());
+    let rules = {
+        let mut rules = vec![];
+        for config in BoxxyConfig::config_paths()? {
+            info!("loading rules from {}", config.display());
+            rules.push(BoxxyConfig::load_from_path(&config)?);
+        }
+        BoxxyConfig::merge(rules)
+    };
+    info!("loaded {} total rule(s)", rules.rules.len());
 
     // Do the do!
     let (cmd, args) = (&cfg.command_with_args[0], &cfg.command_with_args[1..]);
@@ -141,8 +145,8 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
-    if self_exe.starts_with("target/debug") {
+fn setup_logging(cfg: &Args) -> Result<()> {
+    if BoxxyConfig::debug_mode()? {
         // If no debug set up, basic debugging in dev
         if std::env::var("RUST_DEBUG").is_err() {
             std::env::set_var("RUST_DEBUG", "1");
@@ -172,58 +176,7 @@ fn setup_logging(cfg: &Args, self_exe: &str) -> Result<()> {
     Ok(())
 }
 
-fn config_file_path(self_exe: &str) -> Result<PathBuf> {
-    let config_file = if self_exe.starts_with("target/debug") {
-        "boxxy-dev.yaml"
-    } else {
-        "boxxy.yaml"
-    };
-
-    debug!("loading config: {}", config_file);
-
-    let config_path =
-        enclosure::fs::append_all(&dirs::config_dir().unwrap(), vec!["boxxy", config_file]);
-
-    fs::create_dir_all(config_path.parent().unwrap())?;
-    if !config_path.exists() {
-        info!("no config file found!");
-        fs::write(&config_path, "rules: []")?;
-        info!("created empty config at {}", config_path.display());
-    }
-
-    Ok(config_path)
-}
-
-fn load_rules(self_exe: &str) -> Result<BoxxyConfig> {
-    let config_path = config_file_path(self_exe)?;
-    let rules = if fs::metadata(&config_path)?.len() > 0 {
-        let config = Config::builder()
-            .add_source(config::File::new(
-                &config_path.as_path().to_string_lossy(),
-                FileFormat::Yaml,
-            ))
-            .build()?;
-        config.try_deserialize::<BoxxyConfig>()?
-    } else {
-        warn!("you have no rules in your config file.");
-        warn!("try adding some rules to {config_path:?}");
-        warn!(
-            r#"
-example rule:
-
-    rules:
-    - name: "make aws cli write to ~/.config/aws"
-      target: "~/.aws"
-      rewrite: "~/.config/aws"
-        "#
-        );
-        BoxxyConfig { rules: vec![] }
-    };
-
-    Ok(rules)
-}
-
-fn scan_homedir(self_exe: &str, apps: Vec<App>) -> Result<()> {
+fn scan_homedir(apps: Vec<App>) -> Result<()> {
     if !apps.is_empty() {
         info!(
             "found {} applications that might be boxxable! generating config...",
@@ -269,7 +222,7 @@ fn scan_homedir(self_exe: &str, apps: Vec<App>) -> Result<()> {
         info!("rules generated: {}", rules.len());
         info!(
             "put relevant rules in your config file: {}",
-            config_file_path(self_exe)?.display()
+            BoxxyConfig::default_config_path()?.display()
         );
     }
 

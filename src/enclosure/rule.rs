@@ -13,6 +13,101 @@ pub struct BoxxyConfig {
     pub rules: Vec<Rule>,
 }
 
+impl BoxxyConfig {
+    pub fn debug_mode() -> Result<bool> {
+        let self_exe = std::fs::read_link("/proc/self/exe")?;
+        Ok(self_exe
+            .into_os_string()
+            .to_string_lossy()
+            .contains("target/debug"))
+    }
+
+    pub fn default_config_path() -> Result<PathBuf> {
+        let config_dir = dirs::config_dir().unwrap();
+        Ok(crate::enclosure::fs::append_all(
+            &config_dir,
+            vec!["boxxy", Self::default_config_file_name()?],
+        ))
+    }
+
+    pub fn default_config_file_name() -> Result<&'static str> {
+        if Self::debug_mode()? {
+            Ok("boxxy-dev.yaml")
+        } else {
+            Ok("boxxy.yaml")
+        }
+    }
+
+    pub fn config_paths() -> Result<Vec<PathBuf>> {
+        let config_file_name = Self::default_config_file_name()?;
+
+        let default_config_file = {
+            let config_dir = dirs::config_dir().unwrap();
+            let config_path =
+                crate::enclosure::fs::append_all(&config_dir, vec!["boxxy", config_file_name]);
+
+            std::fs::create_dir_all(config_path.parent().unwrap())?;
+
+            config_path
+        };
+
+        let mut config_paths = vec![];
+        if default_config_file.exists() {
+            config_paths.push(default_config_file);
+        }
+
+        let pwd_boxxy_config = PathBuf::from(format!("./{config_file_name}"));
+        if pwd_boxxy_config.exists() {
+            config_paths.push(pwd_boxxy_config);
+        }
+
+        Ok(config_paths)
+    }
+
+    pub fn load_from_path(path: &Path) -> Result<BoxxyConfig> {
+        let config = config::Config::builder()
+            .add_source(config::File::new(
+                &path.to_string_lossy(),
+                config::FileFormat::Yaml,
+            ))
+            .build()?;
+
+        let rules = config.try_deserialize::<BoxxyConfig>()?;
+
+        Ok(rules)
+    }
+
+    pub fn merge(configs: Vec<BoxxyConfig>) -> BoxxyConfig {
+        let mut rules = vec![];
+        for config in configs {
+            rules.extend(config.rules);
+        }
+
+        BoxxyConfig { rules }
+    }
+
+    pub fn get_all_applicable_rules(&self, binary: &OsStr, fs: &FsDriver) -> Result<Vec<Rule>> {
+        let mut applicable_rules = vec![];
+
+        for rule in &self.rules {
+            debug!("{}: checking if rule applies to binary", rule.name);
+            if rule.currently_in_context(fs)? {
+                debug!("{}: rule applies to binary via context!", rule.name);
+                applicable_rules.push(rule.clone());
+                continue;
+            }
+
+            if rule.applies_to_binary(binary, fs)? && rule.currently_in_context(fs)? {
+                debug!("{}: rule applies to binary via only + context!", rule.name);
+                applicable_rules.push(rule.clone());
+                continue;
+            }
+        }
+
+        Ok(applicable_rules)
+    }
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Rule {
     /// The name of this rule
