@@ -8,7 +8,7 @@ repository = "https://github.com/queer/boxxy"
 
 [dependencies]
 atty = "0.2.14"
-bat = { version = "0.22.1", default-features = false, features = ["atty", "regex-onig"] }
+bat = { version = "0.23.0", default-features = false, features = ["atty", "regex-onig"] }
 byteorder = "1.4.3"
 cfg-if = "1.0.0"
 clap = { version = "4.1.11", features = ["derive"] }
@@ -25,7 +25,7 @@ log = "0.4.17"
 nix = "0.26.2"
 owo-colors = { version = "3.5.0", features = ["supports-color", "supports-colors"] }
 pretty_env_logger = "0.4.0"
-regex = "1.7.2"
+regex = "1.7.3"
 rlimit = "0.9.1"
 serde = { version = "1.0.158", features = ["derive"] }
 serde_json = "1.0.94"
