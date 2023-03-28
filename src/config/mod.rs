@@ -57,9 +57,31 @@ impl BoxxyConfig {
             config_paths.push(default_config_file);
         }
 
-        let pwd_boxxy_config = PathBuf::from(format!("./{config_file_name}"));
-        if pwd_boxxy_config.exists() {
-            config_paths.push(pwd_boxxy_config);
+        // Search up the tree for a `config_file_name` file
+        let mut current_dir = std::env::current_dir()?;
+        debug!(
+            "searching for boxxy config starting at {}",
+            current_dir.display()
+        );
+        loop {
+            let config_path =
+                crate::enclosure::fs::append_all(&current_dir, vec![config_file_name]);
+            debug!("checking for: {}", config_path.display());
+            if config_path.exists() {
+                debug!("found boxxy config file at {}", config_path.display());
+                config_paths.push(config_path);
+            }
+
+            if let Some(parent) = current_dir.parent() {
+                if parent == current_dir {
+                    debug!("ran out of parents to search!");
+                    break;
+                }
+                current_dir = parent.to_path_buf();
+            } else {
+                debug!("ran out of parents to search!");
+                break;
+            }
         }
 
         Ok(config_paths)
