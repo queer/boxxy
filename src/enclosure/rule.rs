@@ -20,16 +20,15 @@ impl BoxxyRules {
 
         for rule in &self.rules {
             debug!("{}: checking if rule applies to binary", rule.name);
-            if rule.currently_in_context(fs)? {
-                debug!("{}: rule applies to binary via context!", rule.name);
-                applicable_rules.push(rule.clone());
-                continue;
-            }
-
-            if rule.applies_to_binary(binary, fs)? && rule.currently_in_context(fs)? {
+            if rule.currently_in_context(fs)? && rule.applies_to_binary(binary, fs)? {
                 debug!("{}: rule applies to binary via only + context!", rule.name);
                 applicable_rules.push(rule.clone());
-                continue;
+            } else if rule.applies_to_binary(binary, fs)? {
+                debug!(
+                    "{}: rule applies to binary via only but NOT context!",
+                    rule.name
+                );
+                applicable_rules.push(rule.clone());
             }
         }
 
