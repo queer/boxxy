@@ -1,0 +1,59 @@
+pipeline: false
+
+metadata:
+  name: "boxxy"
+  version: "0.6.3-1"
+  description: "boxxy puts bad Linux applications in a box!"
+  author: "amy"
+  arch: "amd64"
+  license: "Apache-2.0"
+
+input:
+  name: "boxxy release binary"
+  type: "file"
+  paths:
+    - "./target/debug/boxxy"
+
+output:
+  - name: "boxxy release binary"
+    type: "tarball"
+    path: "./release/boxxy.tar"
+    injections:
+      - type: "move"
+        src: "/target/debug/boxxy"
+        dest: "/boxxy"
+
+  - name: "boxxy arch package"
+    type: "arch"
+    path: "./release/boxxy.arch.pkg.tar"
+    injections:
+      - type: "move"
+        src: "/target/debug/boxxy"
+        dest: "/usr/bin/boxxy"
+      - type: "delete"
+        path: "/target"
+
+  - name: "boxxy debian package"
+    type: "deb"
+    path: "./release/boxxy.deb"
+    depends: "libc6"
+    injections:
+      - type: "move"
+        src: "/target/debug/boxxy"
+        dest: "/usr/bin/boxxy"
+
+  - name: "boxxy release binary"
+    type: "file"
+    path: "./release"
+    injections:
+      - type: "move"
+        src: "/target/debug/boxxy"
+        dest: "/"
+
+  - name: "boxxy rpm package"
+    type: "rpm"
+    path: "./release/boxxy.rpm"
+    injections:
+      - type: "move"
+        src: "/target/debug/boxxy"
+        dest: "/usr/bin/boxxy"
