@@ -19,7 +19,7 @@ jobs:
           override: true
       - uses: "Swatinem/rust-cache@v1"
         with:
-          key: "tests"
+          key: "build-pkg"
       - uses: "queer/actions/peckish_install@mistress"
       - name: "Build debug binary"
         run: "cargo build"
