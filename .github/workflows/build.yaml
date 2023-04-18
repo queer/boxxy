@@ -21,6 +21,8 @@ jobs:
         with:
           key: "build-pkg"
       - uses: "queer/actions/peckish_install@mistress"
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
       - name: "Build debug binary"
         run: "cargo build"
       - uses: "queer/actions/peckish_run@mistress"
