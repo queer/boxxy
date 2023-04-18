@@ -3,15 +3,10 @@ on:
   push:
     branches:
       - "mistress"
-    paths:
-      - "**.rs"
-      - "**.toml"
   pull_request:
     branches:
       - "mistress"
-    paths:
-      - "**.rs"
-      - "**.toml"
+
 jobs:
   build:
     runs-on: ubuntu-latest
