@@ -15,7 +15,7 @@ jobs:
       - name: "Install latest stable Rust"
         uses: "actions-rs/toolchain@v1"
         with:
-          toolchain: "${{ matrix.version }}"
+          toolchain: "stable"
           override: true
       - uses: "Swatinem/rust-cache@v1"
         with:
