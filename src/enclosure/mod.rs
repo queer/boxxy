@@ -339,7 +339,6 @@ impl Enclosure {
                 }
             }
 
-            info!("* {} -> {}", rule.target, rule.rewrite);
             debug!("rewrote base bath {rewrite_path:?} => {target_path:?}");
         }
 

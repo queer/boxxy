@@ -114,7 +114,7 @@ impl BoxxyConfig {
             let paths = Self::rule_paths()?;
             let mut configs = vec![];
             for path in paths {
-                info!("loading rules from {}", path.display());
+                debug!("loading rules from {}", path.display());
                 let config = Self::load_rules_from_path(&path)?;
                 debug!("loaded {} rules", config.rules.len());
                 configs.push(config);
