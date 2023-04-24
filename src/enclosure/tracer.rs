@@ -272,14 +272,18 @@ impl ChildProcess {
             if #[cfg(target_arch = "x86_64")]  {
                 ptrace::getregs(self.pid).map_err(|e| e.into())
             } else {
-                let mut reg = std::mem::MaybeUninit::<PtraceRegisters>::uninit();
+                let mut regs = std::mem::MaybeUninit::<PtraceRegisters>::uninit();
+                let iovec = libc::iovec {
+                    iov_base: regs.as_mut_ptr() as *mut libc::c_void,
+                    iov_len: std::mem::size_of::<PtraceRegisters>(),
+                };
                 if -1 == unsafe {
                     // ptrace returns -1 on error, and sets errno
-                    libc::ptrace(libc::PTRACE_GETREGSET, self.pid.as_raw(), libc::NT_PRSTATUS, &mut reg as *mut _)
+                    libc::ptrace(libc::PTRACE_GETREGSET, libc::pid_t::from(self.pid), libc::NT_PRSTATUS, &iovec as *const _ as *const libc::c_void)
                 } {
                     Err(nix::errno::Errno::last().into())
                 } else {
-                    Ok(unsafe { reg.assume_init() })
+                    Ok(unsafe { regs.assume_init() })
                 }
             }
         }
