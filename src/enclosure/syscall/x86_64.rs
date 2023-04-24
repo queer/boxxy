@@ -1,14 +1,9 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
-
-use color_eyre::Result;
-use nix::unistd::Pid;
 
 use crate::enclosure::register::StringRegister;
-use crate::enclosure::tracer::{ChildProcess, PtraceRegisters, Tracer};
 
 lazy_static::lazy_static! {
-    static ref SYSCALL_REGISTERS: HashMap<i64, StringRegister> = {
+    pub static ref SYSCALL_REGISTERS: HashMap<i64, StringRegister> = {
         let mut m = HashMap::new();
         // read/write
         m.insert(libc::SYS_read, StringRegister::Rdi);
@@ -173,63 +168,4 @@ lazy_static::lazy_static! {
 
         m
     };
-}
-
-#[derive(Debug, Clone)]
-pub struct Syscall {
-    pub name: String,
-    pub number: u64,
-    pub path: Option<PathBuf>,
-}
-
-pub fn handle_syscall(tracer: &Tracer, pid: Pid) -> Result<Option<Syscall>> {
-    let child = match tracer.get_child(pid) {
-        Some(child) => child,
-        None => unreachable!(
-            "should never get a child from the tracer that the tracer doesn't know about"
-        ),
-    };
-    let registers = child.get_registers()?;
-    let syscall_no = registers.orig_rax;
-    if let Some(syscall_name) = syscall_numbers::native::sys_call_name(syscall_no.try_into()?) {
-        let path = get_path_from_syscall(child, syscall_no, &mut registers.clone())?;
-        let syscall = Syscall {
-            name: syscall_name.to_string(),
-            number: syscall_no,
-            path,
-        };
-
-        Ok(Some(syscall))
-    } else {
-        Ok(None)
-    }
-}
-
-fn get_path_from_syscall(
-    child: &ChildProcess,
-    syscall_no: u64,
-    registers: &mut PtraceRegisters,
-) -> Result<Option<PathBuf>> {
-    if let Some(register) = SYSCALL_REGISTERS.get(&(syscall_no as i64)) {
-        let path_ptr = match register {
-            StringRegister::Rdi => registers.rdi,
-            StringRegister::Rsi => registers.rsi,
-            StringRegister::Rdx => registers.rdx,
-            StringRegister::Rcx => registers.rcx,
-            StringRegister::R8 => registers.r8,
-            StringRegister::R9 => registers.r9,
-        };
-        let path = match child.read_string(register, path_ptr as *mut _) {
-            Ok(path) => PathBuf::from(path),
-            Err(_) => match super::get_fd_path(child.pid(), path_ptr as i32) {
-                Ok(Some(path)) => path,
-                Ok(None) => return Ok(None),
-                Err(_) => return Ok(None),
-            },
-        };
-
-        Ok(Some(path))
-    } else {
-        Ok(None)
-    }
 }

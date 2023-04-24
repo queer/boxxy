@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
 use byteorder::{LittleEndian, WriteBytesExt};
+use cfg_if::cfg_if;
 use color_eyre::Result;
 use log::*;
 use nix::sys::ptrace;
@@ -267,7 +268,25 @@ impl ChildProcess {
     }
 
     pub fn get_registers(&self) -> Result<PtraceRegisters> {
-        ptrace::getregs(self.pid).map_err(|e| e.into())
+        cfg_if! {
+            if #[cfg(target_arch = "x86_64")]  {
+                ptrace::getregs(self.pid).map_err(|e| e.into())
+            } else {
+                let mut regs = std::mem::MaybeUninit::<PtraceRegisters>::uninit();
+                let iovec = libc::iovec {
+                    iov_base: regs.as_mut_ptr() as *mut libc::c_void,
+                    iov_len: std::mem::size_of::<PtraceRegisters>(),
+                };
+                if -1 == unsafe {
+                    // ptrace returns -1 on error, and sets errno
+                    libc::ptrace(libc::PTRACE_GETREGSET, libc::pid_t::from(self.pid), libc::NT_PRSTATUS, &iovec as *const _ as *const libc::c_void)
+                } {
+                    Err(nix::errno::Errno::last().into())
+                } else {
+                    Ok(unsafe { regs.assume_init() })
+                }
+            }
+        }
     }
 
     pub fn clear_register_cache(&self) {
