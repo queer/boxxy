@@ -3,6 +3,8 @@
 boxxy is a tool for boxing up misbehaving Linux applications and forcing them
 to put their files and directories in the right place, **without symlinks!**
 
+boxxy is a part of the [amyware discord server](https://discord.gg/7WgSTwh).
+
 Linux-only! boxxy uses Linux namespaces for its functionality.
 
 For example, consider tmux. It wants to put its config in `~/.tmux.conf`. With
