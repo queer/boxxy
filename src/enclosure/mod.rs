@@ -410,21 +410,31 @@ impl Enclosure {
         );
 
         debug!("and spawn!");
-        let result = self.config.command.spawn()?; // .wait()?;
-        unsafe {
+        let child = self.config.command.spawn()?; // .wait()?;
+        let child_exit_status = unsafe {
+            let mut exit_status = -1;
             loop {
-                let wait_status = libc::wait(std::ptr::null_mut());
-                // dbg!((wpid, wait_status));
-                if wait_status == -1 && nix::errno::errno() != libc::ECHILD {
+                let mut wstatus = -1;
+                let wpid = libc::wait(&mut wstatus);
+                if wpid == -1 && nix::errno::errno() != libc::ECHILD {
                     warn!("!!! NOT ECHLD");
                     break;
                 }
+                if wpid == child.id() as i32 {
+                    debug!("primary child exited with status {wstatus}!");
+                    exit_status = wstatus;
+                }
+                if exit_status >= 0 && wpid == -1 {
+                    debug!("execution finished!");
+                    break;
+                }
             }
-        }
+            exit_status
+        };
 
-        debug!("command exited with status: {:?}", result);
+        debug!("command exited with status: {:?}", child);
 
-        Ok(0) //result.code().map(|c| c as isize).unwrap_or(0isize))
+        Ok(child_exit_status.try_into()?)
     }
 
     fn ensure_file(&self, path: &Path) -> Result<bool> {
