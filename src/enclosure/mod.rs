@@ -396,6 +396,11 @@ impl Enclosure {
         ptrace::traceme()?;
         signal::kill(getpid(), signal::SIGSTOP)?;
 
+        // We have to set the child subreaper so that we can track
+        // grand-*children effectively. See https://github.com/queer/boxxy/issues/62
+        debug!("setting CHILD_SUBREAPER to {}", getpid());
+        unsafe { libc::prctl(libc::PR_SET_CHILD_SUBREAPER, getpid()) };
+
         // Do the needful!
         debug!("running command: {:?}", self.config.command.get_program());
         info!(
@@ -403,11 +408,23 @@ impl Enclosure {
             format!("boxed {:?} ♥", self.config.command.get_program())
                 .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
-        let result = self.config.command.spawn()?.wait()?;
+
+        debug!("and spawn!");
+        let result = self.config.command.spawn()?; // .wait()?;
+        unsafe {
+            loop {
+                let wait_status = libc::wait(std::ptr::null_mut());
+                // dbg!((wpid, wait_status));
+                if wait_status == -1 && nix::errno::errno() != libc::ECHILD {
+                    warn!("!!! NOT ECHLD");
+                    break;
+                }
+            }
+        }
 
         debug!("command exited with status: {:?}", result);
 
-        Ok(result.code().map(|c| c as isize).unwrap_or(0isize))
+        Ok(0) //result.code().map(|c| c as isize).unwrap_or(0isize))
     }
 
     fn ensure_file(&self, path: &Path) -> Result<bool> {

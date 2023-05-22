@@ -4,3 +4,7 @@ rules:
     rewrite: "/tmp"
     env:
       KEY: "TEST VALUE"
+  - name: "forking binaries need to be wrapped properly"
+    target: "./forks"
+    rewrite: "/tmp/forks"
+    mode: "directory"
