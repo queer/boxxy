@@ -34,7 +34,7 @@ on:
       - v[0-9]+.*
 
 env:
-  ALL_CARGO_DIST_TARGET_ARGS: --target=x86_64-unknown-linux-gnu
+  ALL_CARGO_DIST_TARGET_ARGS: --target=x86_64-unknown-linux-gnu --target=x86_64-unknown-linux-musl
   ALL_CARGO_DIST_INSTALLER_ARGS:
 
 jobs:
