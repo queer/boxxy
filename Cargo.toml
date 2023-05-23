@@ -25,7 +25,7 @@ log = "0.4.17"
 nix = "0.26.2"
 owo-colors = { version = "3.5.0", features = ["supports-color", "supports-colors"] }
 pretty_env_logger = "0.5.0"
-regex = "1.8.1"
+regex = "1.8.2"
 rlimit = "0.9.1"
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
