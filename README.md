@@ -5,6 +5,10 @@ to put their files and directories in the right place, **without symlinks!**
 
 boxxy is a part of the [amyware discord server](https://discord.gg/7WgSTwh).
 
+If you like what I make, consider supporting me on Patreon:
+
+[<img src="https://i.imgur.com/YFjoCd1.png" width="162" height="38" />](https://patreon.com/amyware)
+
 Linux-only! boxxy uses Linux namespaces for its functionality.
 
 For example, consider tmux. It wants to put its config in `~/.tmux.conf`. With
