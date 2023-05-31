@@ -1,7 +1,8 @@
 # boxxy
 
-boxxy is a tool for boxing up misbehaving Linux applications and forcing them
-to put their files and directories in the right place, **without symlinks!**
+boxxy (case-sensitive) is a tool for boxing up misbehaving Linux applications
+and forcing them to put their files and directories in the right place,
+**without symlinks!**
 
 boxxy is a part of the [amyware discord server](https://discord.gg/7WgSTwh).
 
