@@ -9,6 +9,7 @@ use std::thread;
 use std::time::Duration;
 
 use color_eyre::Result;
+use daemonize::Daemonize;
 use dotenv_parser::parse_dotenv;
 use haikunator::Haikunator;
 use log::*;
@@ -396,6 +397,11 @@ impl Enclosure {
         ptrace::traceme()?;
         signal::kill(getpid(), signal::SIGSTOP)?;
 
+        // We have to set the child subreaper so that we can track
+        // grand-*children effectively. See https://github.com/queer/boxxy/issues/62
+        debug!("setting CHILD_SUBREAPER to {}", getpid());
+        unsafe { libc::prctl(libc::PR_SET_CHILD_SUBREAPER, getpid()) };
+
         // Do the needful!
         debug!("running command: {:?}", self.config.command.get_program());
         info!(
@@ -403,11 +409,50 @@ impl Enclosure {
             format!("boxed {:?} ♥", self.config.command.get_program())
                 .if_supports_color(owo_colors::Stream::Stdout, |text| text.fg::<PinkSalmon>())
         );
-        let result = self.config.command.spawn()?.wait()?;
 
-        debug!("command exited with status: {:?}", result);
+        debug!("and spawn!");
+        let child = self.config.command.spawn()?; // .wait()?;
 
-        Ok(result.code().map(|c| c as isize).unwrap_or(0isize))
+        if self.config.daemon {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
+            let stdout = File::create(format!("/tmp/boxxy-{now}.stdout"))?;
+            let stderr = File::create(format!("/tmp/boxxy-{now}.stderr"))?;
+
+            let out = Daemonize::new().stdout(stdout).stderr(stderr).execute();
+            if out.is_parent() {
+                info!("daemonized!");
+                info!("read logs from /tmp/boxxy-{now}.{{stdout,stderr}}.");
+                return Ok(0);
+            }
+        }
+
+        let child_exit_status = unsafe {
+            let mut exit_status = -1;
+            loop {
+                let mut wstatus = -1;
+                let wpid = libc::wait(&mut wstatus);
+                if wpid == -1 && nix::errno::errno() != libc::ECHILD {
+                    warn!("!!! NOT ECHLD");
+                    break;
+                }
+                if wpid == child.id() as i32 {
+                    debug!("primary child exited with status {wstatus}!");
+                    exit_status = wstatus;
+                }
+                if exit_status >= 0 && wpid == -1 {
+                    debug!("execution finished!");
+                    break;
+                }
+            }
+            exit_status
+        };
+
+        debug!("command exited with status: {:?}", child);
+
+        Ok(child_exit_status.try_into()?)
     }
 
     fn ensure_file(&self, path: &Path) -> Result<bool> {

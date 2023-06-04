@@ -11,6 +11,7 @@ pub struct BoxxyConfig {
     pub immutable_root: bool,
     pub trace: bool,
     pub dotenv: bool,
+    pub daemon: bool,
     pub command: Command,
 }
 
@@ -146,6 +147,7 @@ impl BoxxyConfig {
             immutable_root: args.immutable_root,
             trace: args.trace,
             dotenv: args.dotenv,
+            daemon: args.daemon,
             command,
         })
     }
