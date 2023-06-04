@@ -9,6 +9,7 @@ use std::thread;
 use std::time::Duration;
 
 use color_eyre::Result;
+use daemonize::Daemonize;
 use dotenv_parser::parse_dotenv;
 use haikunator::Haikunator;
 use log::*;
@@ -411,6 +412,23 @@ impl Enclosure {
 
         debug!("and spawn!");
         let child = self.config.command.spawn()?; // .wait()?;
+
+        if self.config.daemon {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
+            let stdout = File::create(format!("/tmp/boxxy-{now}.stdout"))?;
+            let stderr = File::create(format!("/tmp/boxxy-{now}.stderr"))?;
+
+            let out = Daemonize::new().stdout(stdout).stderr(stderr).execute();
+            if out.is_parent() {
+                info!("daemonized!");
+                info!("read logs from /tmp/boxxy-{now}.{{stdout,stderr}}.");
+                return Ok(0);
+            }
+        }
+
         let child_exit_status = unsafe {
             let mut exit_status = -1;
             loop {

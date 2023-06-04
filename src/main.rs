@@ -69,6 +69,13 @@ pub struct Args {
     )]
     pub dotenv: bool,
 
+    #[arg(
+        long = "daemon",
+        default_value = "false",
+        help = "Fork to the background and run as a daemon."
+    )]
+    pub daemon: bool,
+
     #[command(subcommand)]
     pub command: Option<BoxxySubcommand>,
 }
