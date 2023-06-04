@@ -45,6 +45,8 @@ force it to puts its data somewhere nice and proper.
 - `0.6.0`: boxxy can use project-local `boxxy.yaml` files, and can load
   `.env` files for you! ![image of 0.6.0 features](https://cdn.mewna.xyz/2023/03/28/Jawp5It1xrnWN.png)
 - `0.6.1`: boxxy rules can inject env vars: ![image of 0.6.1 features](https://cdn.mewna.xyz/2023/03/29/ukcWuiYdtI8yq.png)
+- `0.7.2`: boxxy can fork the boxxed process into the background with the
+  `--daemon` flag.
 
 ### potential drawbacks
 
