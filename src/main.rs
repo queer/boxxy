@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use atty::Stream;
-use clap::{Parser, Subcommand};
+use clap::{ArgAction, Parser, Subcommand};
 use color_eyre::Result;
 use log::*;
 use scanner::App;
@@ -76,6 +76,22 @@ pub struct Args {
     )]
     pub daemon: bool,
 
+    #[arg(
+        long = "no-config",
+        default_value = "false",
+        help = "Disable loading config files entirely.",
+        action = ArgAction::SetTrue
+    )]
+    pub no_config: bool,
+
+    #[arg(
+        short = 'r',
+        long = "rule",
+        help = "Pass rules via CLI. -r/--rule `/remount/this:/to/this:<file/dir>`",
+        action = ArgAction::Append
+    )]
+    pub arg_rules: Vec<String>,
+
     #[command(subcommand)]
     pub command: Option<BoxxySubcommand>,
 }
@@ -118,17 +134,6 @@ fn main() -> Result<()> {
             }
         }
     }
-
-    // Load rules
-    let rules = {
-        let mut rules = vec![];
-        for config in BoxxyConfig::rule_paths()? {
-            info!("loading rules from {}", config.display());
-            rules.push(BoxxyConfig::load_rules_from_path(&config)?);
-        }
-        BoxxyConfig::merge(rules)
-    };
-    info!("loaded {} total rule(s)", rules.rules.len());
 
     // Do the thing!
     enclosure::Enclosure::new(BoxxyConfig::load_config(cfg)?).run()?;

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 use color_eyre::Result;
 use log::*;
@@ -197,4 +198,16 @@ fn empty_hashmap<K, V>() -> HashMap<K, V> {
 pub enum RuleMode {
     File,
     Directory,
+}
+
+impl FromStr for RuleMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "file" => Ok(RuleMode::File),
+            "directory" => Ok(RuleMode::Directory),
+            _ => Err(format!("invalid rule mode: {}", s)),
+        }
+    }
 }

@@ -1,10 +1,11 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use color_eyre::Result;
 use log::*;
 
-use crate::enclosure::rule::BoxxyRules;
+use crate::enclosure::rule::{BoxxyRules, Rule};
 
 pub struct BoxxyConfig {
     pub rules: BoxxyRules,
@@ -101,6 +102,39 @@ impl BoxxyConfig {
         Ok(rules)
     }
 
+    pub fn load_rules_from_cli_flag(rules: &[String]) -> Result<BoxxyRules> {
+        let rules = rules
+            .iter()
+            .map(|s| {
+                let parts: Vec<&str> = s.split(':').collect();
+                match parts.as_slice() {
+                    [src, dest] => Rule {
+                        name: format!("cli-loaded rule: {src} -> {dest}"),
+                        target: src.to_string(),
+                        rewrite: dest.to_string(),
+                        mode: crate::enclosure::rule::RuleMode::File,
+                        context: vec![],
+                        only: vec![],
+                        env: HashMap::new(),
+                    },
+
+                    [src, dest, mode] => Rule {
+                        name: format!("cli-loaded rule: {src} -> {dest} ({mode})"),
+                        target: src.to_string(),
+                        rewrite: dest.to_string(),
+                        mode: mode.parse().unwrap(),
+                        context: vec![],
+                        only: vec![],
+                        env: HashMap::new(),
+                    },
+
+                    _ => panic!("invalid format for cli rule: {s}"),
+                }
+            })
+            .collect();
+        Ok(BoxxyRules { rules })
+    }
+
     pub fn merge(configs: Vec<BoxxyRules>) -> BoxxyRules {
         let mut merged = BoxxyRules { rules: vec![] };
         for config in configs {
@@ -111,18 +145,20 @@ impl BoxxyConfig {
     }
 
     pub fn load_config(args: crate::Args) -> Result<Self> {
+        // Load rules
         let rules = {
-            let paths = Self::rule_paths()?;
-            let mut configs = vec![];
-            for path in paths {
-                debug!("loading rules from {}", path.display());
-                let config = Self::load_rules_from_path(&path)?;
-                debug!("loaded {} rules", config.rules.len());
-                configs.push(config);
+            let mut rules = vec![];
+            if !args.no_config {
+                debug!("loading rules (not asked not to!)");
+                for config in BoxxyConfig::rule_paths()? {
+                    info!("loading rules from {}", config.display());
+                    rules.push(BoxxyConfig::load_rules_from_path(&config)?);
+                }
             }
-
-            Self::merge(configs)
+            rules.push(BoxxyConfig::load_rules_from_cli_flag(&args.arg_rules)?);
+            BoxxyConfig::merge(rules)
         };
+        info!("loaded {} total rule(s)", rules.rules.len());
 
         let (cmd, cmd_args) = (&args.command_with_args[0], &args.command_with_args[1..]);
 
