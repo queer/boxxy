@@ -11,7 +11,7 @@ atty = "0.2.14"
 bat = { version = "0.23.0", default-features = false, features = ["atty", "regex-onig"] }
 byteorder = "1.4.3"
 cfg-if = "1.0.0"
-clap = { version = "4.4.3", features = ["derive"] }
+clap = { version = "4.4.6", features = ["derive"] }
 color-eyre = { version = "0.6.2", features = ["issue-url"] }
 config = "0.13.3"
 ctrlc = "3.4.1"
