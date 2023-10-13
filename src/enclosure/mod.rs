@@ -79,12 +79,16 @@ impl Enclosure {
         let stack: &mut [u8] = stack_vec.as_mut_slice();
 
         // Clone off the container process
-        let pid = clone(
-            Box::new(callback),
-            stack,
-            CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWUSER,
-            Some(nix::sys::signal::Signal::SIGCHLD as i32),
-        )?;
+        // SAFETY: we ask the OS for the right stack size, and failover to a
+        // safe, probably-oversized stack in case.
+        let pid = unsafe {
+            clone(
+                Box::new(callback),
+                stack,
+                CloneFlags::CLONE_NEWNS | CloneFlags::CLONE_NEWUSER,
+                Some(nix::sys::signal::Signal::SIGCHLD as i32),
+            )?
+        };
         if pid.as_raw() == -1 {
             return Err(std::io::Error::last_os_error().into());
         }
