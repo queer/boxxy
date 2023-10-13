@@ -303,9 +303,9 @@ impl Enclosure {
         self.fs.bind_mount_rw(Path::new("/"), &container_root)?;
 
         // Apply all rules via bind mounts
-        info!("applying {} rules", applicable_rules.len());
+        debug!("applying {} rules", applicable_rules.len());
         for rule in applicable_rules {
-            info!("applying rule '{}'", rule.name);
+            debug!("applying rule '{}'", rule.name);
 
             let expanded_target = self.fs.fully_expand_path(&rule.target)?;
             // Rewrite target path into the container
