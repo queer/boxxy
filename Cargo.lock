@@ -221,7 +221,6 @@ dependencies = [
 name = "boxxy"
 version = "0.8.0"
 dependencies = [
- "atty",
  "bat",
  "byteorder",
  "cfg-if",

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
+use std::io::IsTerminal;
 use std::path::PathBuf;
 
-use atty::Stream;
 use clap::{ArgAction, Parser, Subcommand};
 use color_eyre::Result;
 use log::*;
@@ -154,7 +154,7 @@ fn setup_logging(cfg: &Args) -> Result<()> {
         std::env::set_var("RUST_LOG", &cfg.log_level);
     }
 
-    if atty::isnt(Stream::Stdout) && !cfg.force_colour {
+    if !std::io::stdout().is_terminal() && !cfg.force_colour {
         // Disable user-friendliness if we're not outputting to a terminal.
         std::env::set_var("NO_COLOR", "1");
         std::env::set_var("RUST_LOG", "warn");
