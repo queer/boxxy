@@ -13,6 +13,7 @@ use daemonize::Daemonize;
 use dotenv_parser::parse_dotenv;
 use haikunator::Haikunator;
 use log::*;
+use nix::errno::Errno;
 use nix::mount::{umount2, MntFlags};
 use nix::sched::{clone, CloneFlags};
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
@@ -65,7 +66,13 @@ impl Enclosure {
         self.set_up_temporary_files(applicable_rules)?;
 
         // Set up the container: callback, stack, etc.
-        let callback = || self.run_in_container(applicable_rules).unwrap();
+        let callback = || match self.run_in_container(applicable_rules) {
+            Ok(exit_code) => exit_code,
+            Err(err) => {
+                error!("{}", err);
+                -1isize
+            }
+        };
 
         let stack_size = match Resource::STACK.get() {
             Ok((soft, _hard)) => soft as usize,
@@ -152,8 +159,16 @@ impl Enclosure {
         if self.config.trace {
             self.run_with_tracing(pid)?;
         } else {
-            ptrace::detach(pid, None)?;
-            self.run_without_tracing(pid)?;
+            match ptrace::detach(pid, None) {
+                Ok(_) => {
+                    self.run_without_tracing(pid)?;
+                }
+                Err(Errno::ESRCH) => {
+                    error!("child exited early (ESRCH)! try running boxxy with `-l debug` or `-l trace` if it isn't obvious why");
+                    return Ok(());
+                }
+                err => return Ok(err?),
+            }
         }
 
         Ok(())
@@ -287,7 +302,7 @@ impl Enclosure {
                 debug!("loaded env var: {}=********", key);
             }
             if !rule.env.is_empty() {
-                info!(
+                debug!(
                     "loaded {} env vars from rule '{}'",
                     rule.env.len(),
                     rule.name
@@ -372,6 +387,61 @@ impl Enclosure {
     }
 
     fn run_in_container(&mut self, applicable_rules: &[Rule]) -> Result<isize> {
+        // TODO: There HAS to be a better way than this...
+        let mut grep = grep::searcher::SearcherBuilder::new().build();
+
+        let path_to_input_binary = {
+            let program = self.config.command.get_program();
+            match which::which(program) {
+                Ok(path) => path,
+                Err(_) => {
+                    // Check if it's a path we can resolve
+                    let path = PathBuf::from(program);
+                    if path.exists() {
+                        path
+                    } else {
+                        return Err(color_eyre::eyre::eyre!(
+                            "could not resolve binary: {program:?}"
+                        ));
+                    }
+                }
+            }
+        };
+
+        // Search input binary for `--appimage-help` `--appimage-mount` and
+        // `--appimage-extract`.
+        // If it has all of these, it's PROBABLY an AppImage, and we should
+        // warn the end-user that they need to extract it first.
+        // TODO: Could we do this automatically?
+        let mut found_appimage_help = false;
+        let mut found_appimage_mount = false;
+        let mut found_appimage_extract = false;
+        let matcher = grep::regex::RegexMatcher::new(
+            r"(--appimage-help|--appimage-mount|--appimage-extract)",
+        )?;
+        grep.search_path(
+            matcher,
+            path_to_input_binary,
+            // TODO: Write a sink that doesn't care about line numbers and won't raise
+            grep::searcher::sinks::UTF8(|_, line| {
+                if line.contains("--appimage-help") {
+                    found_appimage_help = true;
+                } else if line.contains("--appimage-mount") {
+                    found_appimage_mount = true;
+                } else if line.contains("--appimage-extract") {
+                    found_appimage_extract = true;
+                }
+                Ok(true)
+            }),
+        )?;
+
+        if found_appimage_extract && found_appimage_help && found_appimage_mount {
+            return Err(color_eyre::eyre::eyre!(
+                "{program:?} is an AppImage! Please extract it first with --appimage-extract. For more information, see https://github.com/AppImage/AppImageKit/wiki/FUSE#fallback",
+                program = self.config.command.get_program()
+            ));
+        }
+
         self.set_up_container(applicable_rules)?;
 
         let pwd = std::env::current_dir()?;
@@ -406,7 +476,7 @@ impl Enclosure {
         debug!("setting CHILD_SUBREAPER to {}", getpid());
         unsafe { libc::prctl(libc::PR_SET_CHILD_SUBREAPER, getpid()) };
 
-        // Do the needful!
+        // Do the thing!
         debug!("running command: {:?}", self.config.command.get_program());
         info!(
             "{}",

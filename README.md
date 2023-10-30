@@ -158,3 +158,7 @@ rules:
 - bind-mount rule mounts rw so that target programs can use them
 - remount `/` ro
 - run!
+
+## credits
+
+- `fixtures/helloworld-appimage-x86_84.AppImage`: https://github.com/ClonedRepos/hello-world-appimage
