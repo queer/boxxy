@@ -49,6 +49,7 @@ force it to puts its data somewhere nice and proper.
   `--daemon` flag.
 - `0.8.0`: boxxy can pass rules at the command line with `--rule`, and disable
   loading config files with `--no-config`.
+- `0.8.2`: Explain how to run AppImages properly: ![image of 0.8.2 features](https://cdn.mewna.xyz/2023/10/31/yMiHJaURUud6E.png)
 
 ### potential drawbacks
 
