@@ -33,7 +33,7 @@ nix = { version = "0.27.1", features = [
   "sched",
   "ptrace",
 ] }
-owo-colors = { version = "3.5.0", features = [
+owo-colors = { version = "4.0.0", features = [
   "supports-color",
   "supports-colors",
 ] }
