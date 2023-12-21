@@ -435,9 +435,24 @@ impl Enclosure {
             }),
         )?;
 
-        if found_appimage_extract && found_appimage_help && found_appimage_mount {
+        // If the user is autoextracting the AppImage, we don't want to tell
+        // them to extract it first.
+        let mut self_extracting = false;
+        for arg in self.config.command.get_args() {
+            if arg == "--appimage-extract-and-run" {
+                info!(
+                    "self-extracting AppImages may take a while to extract! please be patient (:"
+                );
+                self_extracting = true;
+                debug!("self-extracting appimage detected!");
+                break;
+            }
+        }
+
+        if found_appimage_extract && found_appimage_help && found_appimage_mount && !self_extracting
+        {
             return Err(color_eyre::eyre::eyre!(
-                "{program:?} is an AppImage! Please extract it first with --appimage-extract. For more information, see https://github.com/AppImage/AppImageKit/wiki/FUSE#fallback",
+                "{program:?} is an AppImage! Please extract it first with --appimage-extract. You can also use --appimage-extract-and-run. For more information, see https://github.com/AppImage/AppImageKit/wiki/FUSE#fallback",
                 program = self.config.command.get_program()
             ));
         }
@@ -487,6 +502,7 @@ impl Enclosure {
         debug!("and spawn!");
         let child = self.config.command.spawn()?; // .wait()?;
 
+        debug!("checking daemonisation needs");
         if self.config.daemon {
             let now = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -503,6 +519,7 @@ impl Enclosure {
             }
         }
 
+        debug!("waiting for child exit...");
         let child_exit_status = unsafe {
             let mut exit_status = -1;
             loop {

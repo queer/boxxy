@@ -163,9 +163,12 @@ impl BoxxyConfig {
         let (cmd, cmd_args) = (&args.command_with_args[0], &args.command_with_args[1..]);
 
         if which::which(cmd).is_err() {
-            error!("command not found in $PATH: {}", cmd);
-            debug!("searched $PATH: {}", std::env::var("PATH")?);
-            std::process::exit(1);
+            // If `which` can't find it, check if the path exists.
+            if !Path::new(cmd).exists() {
+                error!("command not found in $PATH or by path: {}", cmd);
+                debug!("searched $PATH: {}", std::env::var("PATH")?);
+                std::process::exit(1);
+            }
         }
 
         let mut command = Command::new(cmd);
