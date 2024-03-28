@@ -1688,9 +1688,9 @@ dependencies = [
 
 [[package]]
 name = "syscall-numbers"
-version = "3.1.0"
+version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b96d8ea672036889f79f237aa73373d2a97145f5eb9612a336707c1627d1922"
+checksum = "084e382bf467cd3381fdec080d883505792ee0d16a004b1b090abf2db5dc2a29"
 
 [[package]]
 name = "termcolor"
