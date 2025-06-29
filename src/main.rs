@@ -87,7 +87,7 @@ pub struct Args {
     #[arg(
         short = 'r',
         long = "rule",
-        help = "Pass rules via CLI. -r/--rule `/remount/this:/to/this:<file/dir>`",
+        help = "Pass rules via CLI. -r/--rule `/remount/this:/to/this:<file/directory>`",
         action = ArgAction::Append
     )]
     pub arg_rules: Vec<String>,
