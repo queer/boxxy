@@ -12,19 +12,23 @@ If you like what I make, consider supporting me on Patreon:
 
 Linux-only! boxxy uses Linux namespaces for its functionality.
 
-For example, consider tmux. It wants to put its config in `~/.tmux.conf`. With
-boxxy, you can put its config in `~/.config/tmux/tmux.conf` instead:
+For example, consider the AWS CLI. It wants to store its config and credentials
+in `~/.aws/`, but boxxy lets you redirect it to `~/.config/aws/` instead:
 
 ```yaml
 # ~/.config/boxxy/boxxy.yaml
 rules:
-- name: "redirect tmux config from ~/.tmux.conf to ~/.config/tmux/tmux.conf"
-  target: "~/.tmux.conf"
-  rewrite: "~/.config/tmux/tmux.conf"
-  mode: "file"
+- name: "Store AWS CLI config in ~/.config/aws"
+  target: "~/.aws"
+  rewrite: "~/.config/aws"
 ```
 
-[![asciicast](https://asciinema.org/a/558679.svg)](https://asciinema.org/a/558679)
+boxxy lets you control where applications read and write files — whether that's
+for XDG compliance, project-specific configs, or any other path redirection you
+need. While some applications (like tmux 3.1+) have added native XDG support
+over time, many others haven't, and boxxy also enables more advanced use cases
+like context-dependent configurations that applications will never support
+natively.
 
 ## maintenance status
 
