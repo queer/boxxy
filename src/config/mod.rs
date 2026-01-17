@@ -100,7 +100,7 @@ impl BoxxyConfig {
         let mut rules = config.try_deserialize::<BoxxyRules>()?;
 
         for rule in &mut rules.rules {
-            rule.rewrite = shellexpand::full(&rule.rewrite)?.to_string();
+            rule.rewrite = shellexpand::env(&rule.rewrite)?.to_string();
         }
 
         Ok(rules)
@@ -115,7 +115,7 @@ impl BoxxyConfig {
                     [src, dest] => Ok(Rule {
                         name: format!("cli-loaded rule: {src} -> {dest}"),
                         target: src.to_string(),
-                        rewrite: shellexpand::full(dest)?.to_string(),
+                        rewrite: shellexpand::env(dest)?.to_string(),
                         mode: crate::enclosure::rule::RuleMode::File,
                         context: vec![],
                         only: vec![],
@@ -125,7 +125,7 @@ impl BoxxyConfig {
                     [src, dest, mode] => Ok(Rule {
                         name: format!("cli-loaded rule: {src} -> {dest} ({mode})"),
                         target: src.to_string(),
-                        rewrite: shellexpand::full(dest)?.to_string(),
+                        rewrite: shellexpand::env(dest)?.to_string(),
                         mode: mode.parse().unwrap(),
                         context: vec![],
                         only: vec![],
@@ -220,6 +220,29 @@ rules:
 
         let rules = BoxxyConfig::load_rules_from_path(config_file.path())?;
         assert_eq!(rules.rules[0].rewrite, "/dest");
+        Ok(())
+    }
+
+    #[test]
+    fn test_tilde_cli() {
+        let rules = BoxxyConfig::load_rules_from_cli_flag(&["/src:~/dest".to_string()]).unwrap();
+
+        assert_eq!(rules.rules[0].rewrite, "~/dest");
+    }
+
+    #[test]
+    fn test_tilde_file() -> Result<()> {
+        let config_content = r#"
+rules:
+  - name: test
+    target: /src
+    rewrite: ~/dest
+"#;
+        let mut config_file = tempfile::NamedTempFile::new()?;
+        std::io::Write::write_all(&mut config_file, config_content.as_bytes())?;
+
+        let rules = BoxxyConfig::load_rules_from_path(config_file.path())?;
+        assert_eq!(rules.rules[0].rewrite, "~/dest");
         Ok(())
     }
 
