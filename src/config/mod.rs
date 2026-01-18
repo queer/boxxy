@@ -97,7 +97,11 @@ impl BoxxyConfig {
             ))
             .build()?;
 
-        let rules = config.try_deserialize::<BoxxyRules>()?;
+        let mut rules = config.try_deserialize::<BoxxyRules>()?;
+
+        for rule in &mut rules.rules {
+            rule.rewrite = shellexpand::env(&rule.rewrite)?.to_string();
+        }
 
         Ok(rules)
     }
@@ -105,33 +109,33 @@ impl BoxxyConfig {
     pub fn load_rules_from_cli_flag(rules: &[String]) -> Result<BoxxyRules> {
         let rules = rules
             .iter()
-            .map(|s| {
+            .map(|s| -> Result<Rule> {
                 let parts: Vec<&str> = s.split(':').collect();
                 match parts.as_slice() {
-                    [src, dest] => Rule {
+                    [src, dest] => Ok(Rule {
                         name: format!("cli-loaded rule: {src} -> {dest}"),
                         target: src.to_string(),
-                        rewrite: dest.to_string(),
+                        rewrite: shellexpand::env(dest)?.to_string(),
                         mode: crate::enclosure::rule::RuleMode::File,
                         context: vec![],
                         only: vec![],
                         env: HashMap::new(),
-                    },
+                    }),
 
-                    [src, dest, mode] => Rule {
+                    [src, dest, mode] => Ok(Rule {
                         name: format!("cli-loaded rule: {src} -> {dest} ({mode})"),
                         target: src.to_string(),
-                        rewrite: dest.to_string(),
+                        rewrite: shellexpand::env(dest)?.to_string(),
                         mode: mode.parse().unwrap(),
                         context: vec![],
                         only: vec![],
                         env: HashMap::new(),
-                    },
+                    }),
 
                     _ => panic!("invalid format for cli rule: {s}"),
                 }
             })
-            .collect();
+            .collect::<Result<Vec<Rule>>>()?;
         Ok(BoxxyRules { rules })
     }
 
@@ -189,5 +193,82 @@ impl BoxxyConfig {
             daemon: args.daemon,
             command,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_simple_cli() {
+        let rules = BoxxyConfig::load_rules_from_cli_flag(&["/src:/dest".to_string()]).unwrap();
+
+        assert_eq!(rules.rules[0].rewrite, "/dest");
+    }
+
+    #[test]
+    fn test_simple_file() -> Result<()> {
+        let config_content = r#"
+rules:
+  - name: test
+    target: /src
+    rewrite: /dest
+"#;
+        let mut config_file = tempfile::NamedTempFile::new()?;
+        std::io::Write::write_all(&mut config_file, config_content.as_bytes())?;
+
+        let rules = BoxxyConfig::load_rules_from_path(config_file.path())?;
+        assert_eq!(rules.rules[0].rewrite, "/dest");
+        Ok(())
+    }
+
+    #[test]
+    fn test_tilde_cli() {
+        let rules = BoxxyConfig::load_rules_from_cli_flag(&["/src:~/dest".to_string()]).unwrap();
+
+        assert_eq!(rules.rules[0].rewrite, "~/dest");
+    }
+
+    #[test]
+    fn test_tilde_file() -> Result<()> {
+        let config_content = r#"
+rules:
+  - name: test
+    target: /src
+    rewrite: ~/dest
+"#;
+        let mut config_file = tempfile::NamedTempFile::new()?;
+        std::io::Write::write_all(&mut config_file, config_content.as_bytes())?;
+
+        let rules = BoxxyConfig::load_rules_from_path(config_file.path())?;
+        assert_eq!(rules.rules[0].rewrite, "~/dest");
+        Ok(())
+    }
+
+    #[test]
+    fn test_expand_rewrite_cli() {
+        std::env::set_var("TEST_VAR_CLI", "/expanded/path/cli");
+        let rules = BoxxyConfig::load_rules_from_cli_flag(&["/src:$TEST_VAR_CLI/dest".to_string()])
+            .unwrap();
+
+        assert_eq!(rules.rules[0].rewrite, "/expanded/path/cli/dest");
+    }
+
+    #[test]
+    fn test_expand_rewrite_file() -> Result<()> {
+        std::env::set_var("TEST_VAR_FILE", "/expanded/path/file");
+        let config_content = r#"
+rules:
+  - name: test
+    target: /src
+    rewrite: $TEST_VAR_FILE/dest
+"#;
+        let mut config_file = tempfile::NamedTempFile::new()?;
+        std::io::Write::write_all(&mut config_file, config_content.as_bytes())?;
+
+        let rules = BoxxyConfig::load_rules_from_path(config_file.path())?;
+        assert_eq!(rules.rules[0].rewrite, "/expanded/path/file/dest");
+        Ok(())
     }
 }
